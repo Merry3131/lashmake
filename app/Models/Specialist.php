@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Specialist extends Model
@@ -26,5 +27,16 @@ class Specialist extends Model
 
     public function prices(){
         return $this->hasMany(ServicePrice::class, 'level', 'level');
+    }
+
+    protected function levelName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => [
+                'master' => 'Мастер',
+                'top'    => 'Топ-мастер',
+                'lead'   => 'Ведущий специалист',
+            ][$this->level] ?? $this->level,
+        );
     }
 }

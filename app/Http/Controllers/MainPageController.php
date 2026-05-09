@@ -15,6 +15,6 @@ class MainPageController extends Controller
     {
         $categories = Category::with('services')->get();
         $promotions = Promotion::all();
-        return view('public.services', compact('categories', 'promotions'));
+        return view('public.index', compact('categories', 'promotions'));
     }
 }

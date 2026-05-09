@@ -120,7 +120,7 @@
                             <p class="text-gray-600 text-lg mb-8 leading-relaxed">
                                 Создаем идеальный объем: от нежной классики до роскошного «Голливуда». Наши мастера работают в тонких техниках, сохраняя здоровье ваших натуральных ресниц.
                             </p>
-                            <a href="/services" class="inline-block border-2 border-pink-400 text-pink-500 px-8 py-3 rounded-full font-bold hover:bg-pink-400 hover:text-white transition-all transform hover:scale-105">
+                            <a href="{{ url('/example_of_works') }}" class="inline-block border-2 border-pink-400 text-pink-500 px-8 py-3 rounded-full font-bold hover:bg-pink-400 hover:text-white transition-all transform hover:scale-105">
                                 Примеры работ
                             </a>
                         </div>
@@ -142,8 +142,53 @@
                     </div>
                 </div>
             </section>
+
+
         </div>
+        <section class="max-w-7xl mx-auto pt-30 pb-12 px-6">
+            <div class="mb-16">
+                <h2 class="text-4xl lg:text-5xl font-serif text-center relative flex items-center justify-center gap-6 text-gray-900 mx-auto max-w-2xl">
+                    <span class="flex-grow h-0.5 bg-pink-400 rounded-full" aria-hidden="true"></span>
+                    <span class="relative z-10 px-2 uppercase tracking-widest">Наши услуги</span>
+                    <span class="flex-grow h-0.5 bg-pink-400 rounded-full" aria-hidden="true"></span>
+                </h2>
+                <p class="text-center text-gray-500 italic mt-4">Искусство преображения взгляда</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                @foreach($categories as $category)
+                    <div class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full">
+                        <div class="aspect-[4/3] bg-gray-200 relative overflow-hidden flex-shrink-0">
+                            <div class="absolute inset-0 bg-pink-900/10 group-hover:bg-transparent transition-colors duration-500"></div>
+                            <img src="/img/categories/{{ $category->slug }}.jpg" alt="{{ $category->display_name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        </div>
+
+                        <div class="p-8 text-center flex flex-col flex-grow">
+                            <h3 class="text-2xl font-bold mb-4 group-hover:text-pink-500 transition-colors">{{ $category->display_name }}</h3>
+                            <p class="text-gray-600 font-light mb-8 leading-relaxed flex-grow">
+                                {{ $category->description }}
+                            </p>
+                            <div class="mt-auto">
+                                <a href="{{ url('/services') }}" class="block border border-pink-500 rounded-full py-2 px-6 w-full mt-6 font-medium hover:bg-pink-400 hover:text-white transition-all duration-300">
+                                    Смотреть услуги
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+            <button x-data
+                    @click="$store.modalManager.openBooking()"
+                    class="block border border-pink-500 rounded-full py-2 px-6 w-full mt-6 font-medium hover:bg-pink-400 hover:text-white transition-all duration-300">
+                Записаться онлайн
+            </button>
+
+        </section>
     </div>
+
+    {{--            модальное окно записи--}}
+    <x-booking-modal />
 </x-app-layout>
+
 
 

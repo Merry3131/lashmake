@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->decimal('base_price', 10, 2)->default(0.00);
             $table->unsignedSmallInteger('duration');
+            $table->boolean('active')->default(true);
             $table->softDeletes();
             $table->timestamps();
         });

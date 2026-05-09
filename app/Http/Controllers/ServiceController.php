@@ -11,8 +11,13 @@ class ServiceController extends Controller
 {
     public function index(){
         //категории с услугами
-        $categories = Category::with('services')->get();
-        $promotions = Promotion::all();
+        $categories = Category::with(['services' => function ($query) {
+            $query->where('active', true);
+        }])->get();
+
+        $promotions = Promotion::whereHas('service', function ($query) {
+            $query->where('active', true);
+        })->with('service')->get();
         return view('public.services', compact('categories', 'promotions'));
 
     }

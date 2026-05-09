@@ -23,8 +23,9 @@ class DatabaseSeeder extends Seeder
             ServicesSeeder::class,
             PromotionsSeeder::class,
             ExampleWorksSeeder::class,
-            ReviewsSeeder::class,
             AppointmentsSeeder::class,
+            ReviewsSeeder::class,
+
         ]);
 
     }

@@ -55,7 +55,7 @@
                             <div class="flex-grow text-center sm:text-left">
                                 <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2 justify-center sm:justify-start">
                             <span class="text-xs font-bold uppercase tracking-tighter text-pink-500 bg-pink-100 px-2 py-0.5 rounded-md w-fit mx-auto sm:mx-0">
-                                {{ $promotion->type_label }} {{-- Используем ваш аксессор для русского языка --}}
+                                {{ $promotion->type_label }}
                             </span>
                                     <span class="text-gray-400 text-xs italic">
                                 До {{ \Carbon\Carbon::parse($promotion->end_date)->translatedFormat('d F') }}
@@ -79,9 +79,9 @@
                                 </div>
                             @endif
 
-                            {{-- Декоративный круг на фоне --}}
                             <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-pink-200/20 rounded-full blur-2xl"></div>
                         </div>
+
                     @endforeach
                 </div>
             </section>
@@ -127,9 +127,6 @@
                 </div>
             @endforeach
         </div>
-
-
-
         {{-- Блок обратной связи --}}
         <div class="mt-20 text-center bg-pink-50 rounded-3xl p-12">
             <h3 class="text-2xl font-bold text-gray-900 mb-4">Не нашли нужную услугу?</h3>

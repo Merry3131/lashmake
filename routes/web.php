@@ -14,10 +14,15 @@ Route::get('/', function () {
 });
 
 Route::get('/', MainPageController::class)->name('home');
+// главная страница
 Route::get('/promotions', PromotionController::class)->name('promotions.index');
+// услуги
 Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+// специалисты
 Route::get('/team', [TeamController::class, 'index'])->name('team.index');
+// примеры работ
 Route::get('/example_of_works', [ExamplesOfWorkController::class, 'index'])->name('works.index');
+// отзывы
 Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
 
 Route::get('/dashboard', function () {

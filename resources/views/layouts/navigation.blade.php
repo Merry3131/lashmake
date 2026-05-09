@@ -16,11 +16,14 @@
                     <x-nav-link :href="url('/services')" :active="request()->is('services*')">
                         Услуги
                     </x-nav-link>
-                    <x-nav-link :href="url('/team')" :active="request()->is('master*')">
+                    <x-nav-link :href="url('/team')" :active="request()->is('team*')">
                         Специалисты
                     </x-nav-link>
                     <x-nav-link :href="url('/reviews')" :active="request()->is('reviews*')">
                         Отзывы
+                    </x-nav-link>
+                    <x-nav-link :href="url('/example_of_works')" :active="request()->is('example_of_works*')">
+                        Примеры работ
                     </x-nav-link>
                 </div>
             </div>
@@ -79,7 +82,8 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">Главная</x-responsive-nav-link>
             <x-responsive-nav-link :href="url('/services')">Услуги</x-responsive-nav-link>
-            <x-responsive-nav-link :href="url('/master')">Мастера</x-responsive-nav-link>
+            <x-responsive-nav-link :href="url('/team')">Мастера</x-responsive-nav-link>
+            <x-responsive-nav-link :href="url('/example_of_works')">Примеры работ</x-responsive-nav-link>
             <x-responsive-nav-link :href="url('/reviews')">Отзывы</x-responsive-nav-link>
         </div>
 
@@ -97,7 +101,7 @@
         @else
             <div class="pt-4 pb-1 border-t border-gray-200">
                 <x-responsive-nav-link :href="route('login')">Войти</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('register')">Регистрация</x-responsive-nav-link>
+                <x-responsive-nav-link as="button" @click="$dispatch('open-register-modal')" class="cursor-pointer">{{ __('Регистрация') }}</x-responsive-nav-link>
             </div>
         @endauth
     </div>

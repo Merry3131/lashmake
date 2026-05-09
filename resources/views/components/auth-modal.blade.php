@@ -60,6 +60,14 @@
                             <x-input-label for="reg_name" value="Имя" />
                             <x-text-input id="reg_name" class="block mt-1 w-full" type="text" name="first_name" required />
                         </div>
+                        <div>
+                            <x-input-label for="reg_last_name" value="Фамилия" />
+                            <x-text-input id="reg_last_name" class="block mt-1 w-full" type="text" name="last_name" required />
+                        </div>
+                        <div>
+                            <x-input-label for="reg_phone" value="Номер телефона" />
+                            <x-text-input id="reg_phone" class="block mt-1 w-full" type="text" name="phone" required />
+                        </div>
                         <div class="mt-4">
                             <x-input-label for="reg_email" value="Email" />
                             <x-text-input id="reg_email" class="block mt-1 w-full" type="email" name="email" required />
@@ -72,11 +80,21 @@
                             <x-input-label for="password_confirmation" value="Подтвердите пароль" />
                             <x-text-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required />
                         </div>
+                        @if($errors->any())
+                            <div class="mb-4 text-red-600 text-sm">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                         <div class="mt-6">
                             <x-primary-button class="w-full justify-center bg-pink-500 hover:bg-pink-600 shadow-lg shadow-pink-200">
                                 Зарегистрироваться
                             </x-primary-button>
                         </div>
+
                     </form>
                 </div>
             </div>

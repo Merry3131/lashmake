@@ -20,6 +20,7 @@ class ServicesSeeder extends Seeder
                 'category_id' => 1,
                 'base_price' => 1700,
                 'duration' => 120,
+                'active' => true,
             ],
 
             [
@@ -28,6 +29,7 @@ class ServicesSeeder extends Seeder
                 'category_id' => 1,
                 'base_price' => 1900,
                 'duration' => 120,
+                'active' => true,
             ],
 
             [
@@ -36,6 +38,7 @@ class ServicesSeeder extends Seeder
                 'category_id' => 1,
                 'base_price' => 1500,
                 'duration' => 120,
+                'active' => true,
             ],
 
             [
@@ -44,6 +47,7 @@ class ServicesSeeder extends Seeder
                 'category_id' => 1,
                 'base_price' => 1200,
                 'duration' => 90,
+                'active' => true,
             ],
             [
                 'name' => 'Архитектура бровей+окрашивание(краска)+коррекция формы(воск/пинцет)',
@@ -51,6 +55,7 @@ class ServicesSeeder extends Seeder
                 'category_id' => 3,
                 'base_price' => 1200,
                 'duration' => 40,
+                'active' => false,
             ],
             [
                 'name' => 'Ламинирование ресниц',
@@ -58,6 +63,7 @@ class ServicesSeeder extends Seeder
                 'category_id' => 2,
                 'base_price' => 1800,
                 'duration' => 90,
+                'active' => false,
             ],
         ];
         DB::table('services')->insert($services);
