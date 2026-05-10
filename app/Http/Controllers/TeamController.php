@@ -10,7 +10,7 @@ class TeamController extends Controller
     public function index()
     {
         // все мастера с данными из таблицы users
-        $team = Specialist::with('user')->get();
+        $team = Specialist::with(['services.category', 'user'])->get();
 
         return view('public.team', compact('team'));
     }

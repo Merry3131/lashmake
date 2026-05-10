@@ -13,9 +13,7 @@ class Specialist extends Model
         'experience',
         'bio'
     ];
-    public function services()
-    {
-        // связь многие ко многим
+    public function specialists() {
         return $this->belongsToMany(Service::class, 'service_specialist');
     }
 

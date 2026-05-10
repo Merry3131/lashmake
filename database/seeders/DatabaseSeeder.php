@@ -21,10 +21,12 @@ class DatabaseSeeder extends Seeder
             SpecialistsSeeder::class,
             CategorySeeder::class,
             ServicesSeeder::class,
+            ServiceSpecialistSeeder::class,
             PromotionsSeeder::class,
             ExampleWorksSeeder::class,
             AppointmentsSeeder::class,
             ReviewsSeeder::class,
+            WorkScheduleSeeder::class,
 
         ]);
 
