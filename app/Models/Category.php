@@ -9,7 +9,6 @@ class Category extends Model
 
     protected $fillable = ['slug', 'display_name', 'description'];
     public function services(){
-
         return $this->hasMany(Service::class);
     }
 

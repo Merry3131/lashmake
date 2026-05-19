@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('work_schedules', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+
             $table->foreignId('specialist_id')->constrained('specialists')->onDelete('cascade');
             $table->date('work_date');
             $table->time('start_time');
@@ -21,6 +21,7 @@ return new class extends Migration
             $table->time('break_start');
             $table->time('break_end');
             $table->boolean('is_day_off')->default(false);
+            $table->timestamps();
         });
     }
 

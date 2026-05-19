@@ -20,18 +20,31 @@
         loading: false,
 
         async loadSlots() {
-            if (!this.selectedSpecialist || !this.selectedDate) return;
+            // Если мастер или дата не выбраны, очищаем слоты и выходим
+            if (!this.selectedSpecialist || !this.selectedDate) {
+                this.availableSlots = [];
+                return;
+            }
             this.loading = true;
-            try{
+            try {
+                // Передаем параметры, которые ожидает твой WorkScheduleController
                 let response = await fetch(`/api/slots?specialist_id=${this.selectedSpecialist}&date=${this.selectedDate}`);
                 this.availableSlots = await response.json();
             }
             catch(e) {
-                console.error('Ошибка загрузки: ', e);
+                console.error('Ошибка загрузки временных слотов: ', e);
+                this.availableSlots = [];
             }
             finally {
                 this.loading = false;
             }
+        },
+
+        // Инициализация слежения за переменными
+        init() {
+            // Как только меняется мастер или дата — автоматически перерасчитываем окна
+            this.$watch('selectedSpecialist', value => this.loadSlots());
+            this.$watch('selectedDate', value => this.loadSlots());
         }
     }"
      x-show="$store.modalManager.bookingOpen"
@@ -86,6 +99,7 @@
                     @endforeach
 
                     @foreach($categories as $category)
+
                         @if($category->services->isNotEmpty())
                             <h2 class="text-sm font-bold uppercase text-gray-400 mt-4">{{ $category->display_name }}</h2>
                             @foreach($category->services as $service)
@@ -129,7 +143,7 @@
                                 specialistLevel = '{{ $specialist->level }}';
                                 specialistBio = '{{ $specialist->bio }}';
 
-                                specialistServices = {{ $specialist->specialists->groupBy('category.display_name')->toJson() }};
+                                specialistServices = {{ $specialist->service_specialist->groupBy('category.display_name')->toJson() }};
                                 step = 'services_at_specialist';
                                 loadSlots();"
                                 class="w-full flex items-center gap-4 p-3 rounded-xl border border-gray-100 hover:border-pink-300 hover:bg-pink-50/50 transition-all text-left">
@@ -223,7 +237,7 @@
                                             specialistName = specialist.user.first_name + ' ' + (specialist.user.last_name || '');
                                             specialistLevel = levelName;
                                             specialistBio = specialist.bio || '';
-                                            step = 'calendar_2';
+                                            step = 'calendar';
                                             loadSlots();"
                                             class="w-full flex items-center gap-4 p-3 rounded-xl border border-gray-100 hover:border-pink-300 hover:bg-pink-50/50 transition-all text-left">
 
@@ -249,105 +263,10 @@
                 </div>
             </div>
 
+
+
             {{-- Шаг 4.1: Выбор даты и времени --}}
             <div x-show="step === 'calendar'" class="space-y-4" x-transition>
-                <div class="relative flex items-center justify-center mb-4">
-                    <button @click="step = 'services_at_specialist'" class="absolute left-0 text-pink-500 hover:underline text-sm">Назад</button>
-                    <h1 class="text-xl font-bold text-gray-800">Дата и время</h1>
-                </div>
-
-                {{-- 1. Горизонтальный выбор даты --}}
-                <div class="mb-6">
-                    <label class="text-xs text-gray-400 uppercase font-bold px-1">Доступные даты</label>
-                    <div class="flex gap-2 overflow-x-auto py-2 custom-scrollbar">
-                        @for($i = 0; $i < 30; $i++)
-                        @php $date = \Carbon\Carbon::today()->addDays($i); @endphp
-                        <button @click="selectedDate = '{{ $date->format('Y-m-d') }}'; loadSlots();"
-                                :class="selectedDate === '{{ $date->format('Y-m-d') }}' ? 'bg-pink-500 text-white shadow-lg shadow-pink-200' : 'bg-pink-50 text-pink-600'"
-                                class="flex-shrink-0 w-16 py-3 rounded-2xl text-center transition-all border border-pink-100">
-                            <div class="text-[10px] uppercase font-semibold">{{ $date->translatedFormat('D') }}</div>
-                            <div class="text-lg font-bold">{{ $date->format('d') }}</div>
-                            <div class="text-[10px] uppercase">{{ $date->translatedFormat('M') }}</div>
-                        </button>
-                        @endfor
-                    </div>
-                </div>
-
-
-                {{-- 2. Информационная карточка выбранного специалиста --}}
-                <div class="bg-gray-50 rounded-3xl p-5 mb-4 border border-gray-100 shadow-sm">
-                    <h1>Выбранный мастер: </h1>
-                    <div class="flex items-center gap-4 mb-3">
-                        <div class="w-16 h-16 bg-pink-500 rounded-2xl flex-shrink-0 flex items-center justify-center text-white text-2xl font-bold shadow-inner">
-                            <span x-text="specialistName ? specialistName[0] : 'M'"></span>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-center justify-between">
-                                <h3 class="font-extrabold text-gray-800 text-lg" x-text="specialistName"></h3>
-                                <span class="bg-pink-100 text-pink-600 text-[10px] px-2 py-1 rounded-lg uppercase font-bold" x-text="specialistLevel"></span>
-                            </div>
-                            <div class="text-sm text-gray-500 mt-0.5 italic">Ваш мастер</div>
-                        </div>
-                    </div>
-
-                    {{-- Блок BIO --}}
-                    <div class="border-t border-gray-200 pt-3 mt-3">
-                        <p class="text-xs text-gray-600 leading-relaxed" x-text="specialistBio"></p>
-                    </div>
-                </div>
-
-                {{-- 2. Информационная карточка услуги --}}
-                <div class="bg-gray-50 rounded-3xl p-5 mb-4 border border-gray-100 shadow-sm">
-                    <h1>Выбранная услуга: </h1>
-                    <div class="flex items-center gap-4 mb-3">
-
-                        <div class="w-16 h-16 bg-pink-500 rounded-2xl flex-shrink-0 flex items-center justify-center text-white text-2xl font-bold shadow-inner">
-                            <span x-text="serviceName ? serviceName[0] : 'S'"></span>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-center justify-between">
-                                <h3 class="font-extrabold text-gray-800 text-lg" x-text="serviceName"></h3>
-                                <span class="bg-pink-100 text-pink-600 text-[10px] px-2 py-1 rounded-lg uppercase font-bold" x-text="servicePrice"></span>
-                            </div>
-                            <div class="text-sm text-gray-500 mt-0.5 italic" x-text="serviceDuration"></div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- 3. Сетка выбора времени --}}
-                <div class="max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                    <label class="text-xs text-gray-400 uppercase font-bold px-1 mb-2 block">Доступные слоты</label>
-
-                    <template x-if="loading">
-                        <div class="flex justify-center py-10">
-                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
-                        </div>
-                    </template>
-
-                    <div class="grid grid-cols-4 gap-2" x-show="!loading">
-                        <template x-for="slot in availableSlots" :key="slot">
-                            <button @click="selectedTime = slot; step = 'final_check'"
-                                    class="p-2 text-sm font-bold rounded-xl border border-pink-100 text-pink-600 bg-white hover:bg-pink-500 hover:text-white hover:shadow-md transition-all text-center">
-                                <span x-text="slot"></span>
-                            </button>
-                        </template>
-                    </div>
-
-                    {{-- Заглушка, если времени нет --}}
-                    <template x-if="!loading && availableSlots.length === 0">
-                        <div class="text-center py-10 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                            <svg class="w-12 h-12 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <p class="text-gray-400 text-sm">На выбранную дату свободных мест нет</p>
-                            <p class="text-xs text-gray-400 mt-1">Попробуйте выбрать другой день</p>
-                        </div>
-                    </template>
-                </div>
-            </div>
-
-            {{-- Шаг 4.1: Выбор даты и времени --}}
-            <div x-show="step === 'calendar_2'" class="space-y-4" x-transition>
                 <div class="relative flex items-center justify-center mb-4">
                     <button @click="step = 'specialists_at_service'" class="absolute left-0 text-pink-500 hover:underline text-sm">Назад</button>
                     <h1 class="text-xl font-bold text-gray-800">Дата и время</h1>
@@ -443,7 +362,112 @@
                 </div>
             </div>
 
+            {{--Финальный шаг--}}
+            <div x-show="step === 'final_check'" class="space-y-6" x-transition>
+                <div class="relative flex items-center justify-center mb-4">
+                    <button @click="step = 'date_time'" class="absolute left-0 text-pink-500 hover:underline text-sm">Назад</button>
+                    <h1 class="text-xl font-bold text-gray-800">Проверьте детали записи</h1>
+                </div>
 
+                <div class="bg-pink-50/50 border border-pink-100 rounded-2xl p-4 space-y-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="p-2 bg-pink-500 rounded-xl text-white mt-0.5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-gray-400 uppercase">Услуга</div>
+                            <div class="font-bold text-gray-800 text-base" x-text="serviceName"></div>
+                            <div class="text-xs text-gray-500" x-text="'Длительность: ' + serviceDuration"></div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <div class="flex items-start space-x-3">
+                        <div class="p-2 bg-pink-500 rounded-xl text-white mt-0.5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-gray-400 uppercase">Мастер</div>
+                            <div class="font-bold text-gray-800 text-base" x-text="specialistName"></div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <div class="flex items-start space-x-3">
+                        <div class="p-2 bg-pink-500 rounded-xl text-white mt-0.5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-gray-400 uppercase">Дата и время</div>
+                            <div class="font-bold text-gray-800 text-base">
+                                <span x-text="new Date(selectedDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })"></span>
+                                в <span x-text="selectedTime"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <span class="font-medium text-gray-600">Итого к оплате:</span>
+                    <span class="text-2xl font-black text-pink-600" x-text="servicePrice"></span>
+                </div>
+
+                <div>
+                    @auth
+                        <button @click="
+                loading = true;
+                fetch('/api/appointments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        specialist_id: selectedSpecialist,
+                        service_id: selectedService,
+                        date: selectedDate,
+                        time: selectedTime
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    loading = false;
+                    alert('Вы успешно записались!');
+                    $store.modalManager.closeBooking();
+                    // Здесь можно сделать редирект в личный кабинет:
+                    window.location.href = '/dashboard';
+                })
+                .catch(e => {
+                    loading = false;
+                    alert('Ошибка при создании записи.');
+                });
+                "
+                                :disabled="loading"
+                                class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold p-4 rounded-xl shadow-lg shadow-pink-200 transition-all text-center disabled:opacity-50">
+                            <span x-show="!loading">Подтвердить запись</span>
+                            <span x-show="loading">Оформление записи...</span>
+                        </button>
+                    @else
+                        <div class="space-y-2">
+                            <div class="text-center text-sm text-gray-500">
+                                Для завершения онлайн-записи необходимо авторизоваться
+                            </div>
+                            <a href="{{ route('login') }}"
+                               class="block w-full bg-gray-800 hover:bg-gray-900 text-white font-bold p-4 rounded-xl text-center transition-all">
+                                Войти в личный кабинет
+                            </a>
+                        </div>
+                    @endauth
+                </div>
+            </div>
 
         </div>
     </div>

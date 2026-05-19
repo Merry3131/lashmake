@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
                 'email' => 'habibullina_alena@gmail.com',
                 'password' => Hash::make('111'),
                 'phone' => '+79086541212',
-                'role' => 'master'
+                'role' => 'admin'
             ],
             [
                 'first_name' => 'Надежда',

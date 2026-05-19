@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\WorkSchedule;
+use App\Models\Service;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class WorkScheduleController extends Controller
 {
@@ -66,25 +68,84 @@ class WorkScheduleController extends Controller
     }
 
     // создание новой записи на услугу
-    public function store(Request $request){
-        //данные для валидации
+    public function store(Request $request)
+    {
+        // 1. Проверяем, авторизован ли пользователь (на всякий случай)
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Пользователь не авторизован.'
+            ], 401);
+        }
+
+        // 2. Валидация входящих данных
         $validated = $request->validate([
-           'specialist_id' => 'required|exists:specialists,id',
-           'service_id' => 'required|exists:services,id',
-            'date' => 'required|date',
-            'time' => 'required',
+            'specialist_id' => 'required|exists:specialists,id',
+            'service_id'    => 'required|exists:services,id',
+            'date'          => 'required|date',
+            'time'          => 'required|string',
         ]);
 
-        $appointmentAt = Carbon::parse($validated['date'] . ' ' . $validated['time']);
+        try {
+            // 3. Безопасное склеивание даты и времени через специальный метод Carbon
+            // Из "2026-05-20" и "14:30" создаем полноценный объект даты-времени
+            $appointmentAt = Carbon::createFromFormat('Y-m-d H:i', $validated['date'] . ' ' . $validated['time']);
 
-        Appointment::create([
-            'user_id' => auth()->id(),
-            'specialist_id' => $validated['specialist_id'],
-            'service_id' => $validated['service_id'],
-            'appointment_at' => $appointmentAt,
-            'status' => 'pending'
-        ]);
+            if (!$appointmentAt) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Некорректный формат даты или времени.'
+                ], 422);
+            }
 
-        return response()->json(['message' => 'Вы успешно записаны!']);
+            // 4. Находим услугу, чтобы взять её базовую стоимость
+            $service = Service::find($validated['service_id']);
+            if (!$service) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Услуга не найдена в базе данных.'
+                ], 404);
+            }
+
+            // 5. Проверяем, не занято ли это время у мастера (учитываем статус cancelled)
+            $isTimeOccupied = Appointment::where('specialist_id', $validated['specialist_id'])
+                ->where('appointment_at', $appointmentAt)
+                ->where('status', '!=', 'cancelled')
+                ->exists();
+
+            if ($isTimeOccupied) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'К сожалению, это время уже занято.'
+                ], 422);
+            }
+
+            // 6. Запись в базу данных
+            $appointment = Appointment::create([
+                'client_id'      => Auth::id(), // Записываем ID текущего пользователя
+                'specialist_id'  => $validated['specialist_id'],
+                'service_id'     => $validated['service_id'],
+                'appointment_at' => $appointmentAt,
+                'final_price'    => $service->base_price, // Обязательное поле для БД
+                'status'         => 'pending'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Вы успешно записались!',
+                'data'    => $appointment
+            ], 201);
+
+        } catch (\Exception $e) {
+            // Это запишет детальный текст ошибки (какой именно файл или строка упали) в файл storage/logs/laravel.log
+            \Log::error('Критическая ошибка при создании записи: ' . $e->getMessage() . ' в файле ' . $e->getFile() . ' на строке ' . $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Внутренняя ошибка сервера: ' . $e->getMessage()
+            ], 500);
+        }
     }
+
+
 }

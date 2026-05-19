@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Appointment extends Model
 {
@@ -17,7 +19,18 @@ class Appointment extends Model
         'notes',
     ];
 
-    public function service(){
+    protected $casts = [
+        'appointment_at' => 'datetime',
+        'final_price' => 'decimal:2',
+    ];
+
+    public function service(): BelongsTo
+    {
         return $this->belongsTo(Service::class);
+    }
+
+    public function specialist(): BelongsTo
+    {
+        return $this->belongsTo(Specialist::class);
     }
 }

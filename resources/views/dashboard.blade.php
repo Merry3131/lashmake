@@ -37,8 +37,60 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Статус</th>
                                     </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-gray-200">
+                                    <tbody class="divide-y divide-gray-200 bg-white">
+                                    @forelse($appointments as $appointment)
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <div class="font-bold">
+                                                    {{ $appointment->appointment_at->translatedFormat('j F Y') }}
+                                                </div>
+                                                <div class="text-xs text-gray-500">
+                                                    в {{ $appointment->appointment_at->format('H:i') }}
+                                                </div>
+                                            </td>
 
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <div class="font-medium text-gray-800">
+                                                    {{ $appointment->service->name ?? 'Услуга удалена' }}
+                                                </div>
+                                                <div class="text-xs text-pink-500">
+                                                    Мастер: {{ $appointment->specialist->user->first_name ?? 'Не указан' }}
+                                                </div>
+                                                <div class="text-xs font-semibold text-gray-700 mt-0.5">
+                                                    {{ number_format($appointment->final_price, 0, '.', ' ') }} ₽
+                                                </div>
+                                            </td>
+
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                @if($appointment->status === 'pending')
+                                                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                        Ожидает подтверждения
+                    </span>
+                                                @elseif($appointment->status === 'confirmed')
+                                                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                        Подтверждена
+                    </span>
+                                                @elseif($appointment->status === 'completed')
+                                                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                        Выполнена
+                    </span>
+                                                    <@elseif($appointment->status === 'cancelled')
+                                                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                        Отменена
+                    </span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="3" class="px-6 py-10 text-center text-sm text-gray-400">
+                                                <svg class="w-10 h-10 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                </svg>
+                                                У вас пока нет активных записей.
+                                            </td>
+                                        </tr>
+                                    @endforelse
                                     </tbody>
                                 </table>
                             </div>
