@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('services', function (Blueprint $table) {
+        Schema::create('level_service', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('description');
-            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
-            $table->boolean('active')->default(true);
-            $table->softDeletes();
+            $table->foreignId('service_id')->constrained('services')->onDelete('cascade');
+            $table->foreignId('level_id')->nullable()->constrained('levels')->onDelete('cascade');
+            $table->decimal('price', 10, 2);
+            $table->unsignedSmallInteger('duration');
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('services');
+        Schema::dropIfExists('level_service');
     }
 };

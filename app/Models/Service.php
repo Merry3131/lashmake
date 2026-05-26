@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Service extends Model
 {
@@ -13,9 +14,8 @@ class Service extends Model
     protected $fillable = [
         'name',
         'description',
-        'category',
-        'base_price',
-        'duration',
+        'category_id',
+        'active',
     ];
 
     protected function casts(): array{
@@ -26,5 +26,10 @@ class Service extends Model
 
     public function category(){
         return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function levels(): BelongsToMany
+    {
+        return $this->belongsToMany(Level::class, 'level_service')->withPivot('price', 'duration');
     }
 }

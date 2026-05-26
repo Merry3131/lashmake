@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\LevelController;
+use App\Http\Controllers\Admin\SpecialistController;
 use App\Http\Controllers\ExamplesOfWorkController;
 use App\Http\Controllers\MainPageController;
 use App\Http\Controllers\ProfileController;
@@ -43,7 +46,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     //главная страница админки
     Route::get('/', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
     //управление услугами, мастерами, записями
-    Route::resource('services', AdminServicesController::class);
+//    Route::resource('services', AdminServicesController::class);
+    // crud таблицы Категории Услуг
+    Route::resource('categories', CategoryController::class);
+    // crud таблицы Специалисты
+    Route::resource('specialists', SpecialistController::class);
+    // crud таблицы Специалисты
+    Route::resource('services', \App\Http\Controllers\Admin\ServiceController::class);
+
+    // промежуточный шаг для сборки мастера
+    Route::get('specialists/build/{user}', [SpecialistController::class, 'build'])->name('specialists.build');
+
+    Route::resource('specialists', SpecialistController::class);
+
+    // записи
+    Route::resource('appointments', \App\Http\Controllers\Admin\AppointmentController::class);
+
 });
 
 require __DIR__.'/auth.php';

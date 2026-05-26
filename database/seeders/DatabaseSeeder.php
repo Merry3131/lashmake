@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
+            LevelSeeder::class,
             SpecialistsSeeder::class,
             CategorySeeder::class,
             ServicesSeeder::class,
@@ -27,7 +28,7 @@ class DatabaseSeeder extends Seeder
             AppointmentsSeeder::class,
             ReviewsSeeder::class,
             WorkScheduleSeeder::class,
-
+            LevelServiceSeeder::class,
         ]);
 
     }

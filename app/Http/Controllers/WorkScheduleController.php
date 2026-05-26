@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use App\Models\Specialist;
 use App\Models\WorkSchedule;
 use App\Models\Service;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class WorkScheduleController extends Controller
 {
@@ -51,15 +53,23 @@ class WorkScheduleController extends Controller
             }
         }
 
-        // сверка с занятыит записями
-        $bookedSlots = Appointment::where('specialist_id', $specID)
+        // ==================== ВОТ ЭТОТ БЛОК МЫ ЗАМЕНИЛИ ====================
+        // Сверка с занятыми записями (с возможностью исключить текущую редактируемую запись)
+        $bookedSlotsQuery = Appointment::where('specialist_id', $specID)
             ->whereDate('appointment_at', $date)
-            ->whereIn('status', ['pending', 'confirmed'])
-            ->pluck('appointment_at')
+            ->whereIn('status', ['pending', 'confirmed']);
+
+        // Добавляем эту проверку: если передали ID редактируемой записи, не считаем её занятой
+        if ($request->filled('ignore_appointment_id')) {
+            $bookedSlotsQuery->where('id', '!=', $request->ignore_appointment_id);
+        }
+
+        $bookedSlots = $bookedSlotsQuery->pluck('appointment_at')
             ->map(function($datetime){
                 return Carbon::parse($datetime)->format('H:i');
             })
             ->toArray();
+        // ===================================================================
 
         //убираем занятое время из общего списка
         $availableSlots = array_values(array_diff($slots, $bookedSlots));
@@ -98,13 +108,20 @@ class WorkScheduleController extends Controller
                 ], 422);
             }
 
-            // 4. Находим услугу, чтобы взять её базовую стоимость
-            $service = Service::find($validated['service_id']);
-            if (!$service) {
+            // 2. Находим мастера, чтобы узнать его категорию (level_id)
+            $specialist = Specialist::findOrFail($request->specialist_id);
+
+            // 3. КРИТИЧЕСКИЙ ШАГ: Ищем правильную цену в сводной таблице level_service
+            $levelService = DB::table('level_service')
+                ->where('service_id', $request->service_id)
+                ->where('level_id', $specialist->level_id)
+                ->first();
+
+            if (!$levelService) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Услуга не найдена в базе данных.'
-                ], 404);
+                    'message' => "В базе level_service нет цены для service_id: {$validated['service_id']} и level_id мастера: " . ($specialist->level_id ?? 'NULL')
+                ], 422);
             }
 
             // 5. Проверяем, не занято ли это время у мастера (учитываем статус cancelled)
@@ -126,23 +143,23 @@ class WorkScheduleController extends Controller
                 'specialist_id'  => $validated['specialist_id'],
                 'service_id'     => $validated['service_id'],
                 'appointment_at' => $appointmentAt,
-                'final_price'    => $service->base_price, // Обязательное поле для БД
+                'final_price'    => $levelService->price, // Обязательное поле для БД
                 'status'         => 'pending'
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Вы успешно записались!',
+                'message' => 'Вы успешно з111аписались!',
                 'data'    => $appointment
             ], 201);
 
         } catch (\Exception $e) {
             // Это запишет детальный текст ошибки (какой именно файл или строка упали) в файл storage/logs/laravel.log
-            \Log::error('Критическая ошибка при создании записи: ' . $e->getMessage() . ' в файле ' . $e->getFile() . ' на строке ' . $e->getLine());
+            \Log::error('Критическая ошибка при создании записи цветок: ' . $e->getMessage() . ' в файле ' . $e->getFile() . ' на строке ' . $e->getLine());
 
             return response()->json([
                 'success' => false,
-                'message' => 'Внутренняя ошибка сервера: ' . $e->getMessage()
+                'message' => 'Внутренняя ошибка сервера цветок: ' . $e->getMessage()
             ], 500);
         }
     }

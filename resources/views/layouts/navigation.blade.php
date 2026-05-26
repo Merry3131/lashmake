@@ -46,9 +46,11 @@
                             <x-dropdown-link :href="route('dashboard')">
                                 Личный кабинет
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('profile.edit')">
-                                Профиль
+                            @if (\Illuminate\Support\Facades\Auth::user()->isAdmin())
+                            <x-dropdown-link :href="route('admin.dashboard')">
+                                Админ-панель
                             </x-dropdown-link>
+                            @endif
                             <hr class="border-gray-100">
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf

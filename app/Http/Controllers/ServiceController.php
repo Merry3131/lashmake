@@ -10,14 +10,19 @@ use Illuminate\Http\Request;
 class ServiceController extends Controller
 {
     public function index(){
-        //категории с услугами
-        $categories = Category::with(['services' => function ($query) {
-            $query->where('active', true);
-        }])->get();
+        $categories = Category::with([
+            'services' => function ($query) {
+                $query->where('active', true);
+            },
+            'services.levels', // Загружаем цены и время (pivot)
+            'services.specialists.user', // Загружаем мастеров и их личные данные
+            'services.specialists.level' // Загружаем уровни мастеров
+        ])->get();
 
         $promotions = Promotion::whereHas('service', function ($query) {
             $query->where('active', true);
-        })->with('service')->get();
+        })->with(['service.levels', 'service.specialists.user', 'service.specialists.level'])->get();
+
         return view('public.services', compact('categories', 'promotions'));
 
     }

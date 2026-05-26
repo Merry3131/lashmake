@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             // объединение с таблицей users
             $table->foreignId('user_id')->unique()->constrained('users')->onDelete('cascade');
-            $table->enum('level', ['master', 'top', 'lead']);
+            $table->foreignId('level_id')->nullable()->constrained('levels')->onDelete('set null');
             $table->string('experience');
             $table->text('bio');
             $table->timestamps();

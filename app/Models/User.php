@@ -52,4 +52,9 @@ class User extends Authenticatable
     public function specialist(){
         return $this->hasOne(Specialist::class);
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
 }

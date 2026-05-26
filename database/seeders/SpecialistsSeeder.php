@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\LevelSpecialistEnum;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -26,28 +27,28 @@ class SpecialistsSeeder extends Seeder
         $specialists = [
           [
               'user_id' => $alenaId,
-              'level' => 'lead',
+              'level_id' => 1,
               'experience' => '8 лет',
               'bio' => 'Руководитель студии и ведущий специалист по наращиванию ресниц'
 
           ],
             [
                 'user_id' => $nadegdaId,
-                'level' => 'top',
+                'level_id' => 2,
                 'experience' => '6 лет',
                 'bio' => 'Ведущий специалист по наращиванию ресниц'
 
             ],
             [
                 'user_id' => $nadegdaRId,
-                'level' => 'master',
+                'level_id' => 3,
                 'experience' => '4 года',
                 'bio' => 'Мастер по ламинированию ресниц и оформлению бровей'
 
             ],
             [
                 'user_id' => $dariaId,
-                'level' => 'top',
+                'level_id' => 2,
                 'experience' => '5 лет',
                 'bio' => 'Ведущий специалист по наращиванию ресниц'
 
