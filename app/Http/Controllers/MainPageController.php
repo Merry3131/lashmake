@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Promotion;
+use App\Models\Specialist;
 use Illuminate\Http\Request;
 
 class MainPageController extends Controller
@@ -15,6 +16,7 @@ class MainPageController extends Controller
     {
         $categories = Category::with('services')->get();
         $promotions = Promotion::all();
-        return view('public.index', compact('categories', 'promotions'));
+        $specialists = Specialist::all();
+        return view('public.index', compact('categories', 'promotions', 'specialists'));
     }
 }

@@ -9,7 +9,7 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-//получаем свободное время для записи
+// расчет свободного времемени для записи
 Route::get('/slots', [WorkScheduleController::class, 'getAvailableSlots']);
 
 // сохраняем запись клиента

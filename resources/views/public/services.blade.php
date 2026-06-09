@@ -87,7 +87,7 @@
             </section>
         @endif
 
-        <div class="text-center mb-12">
+        <div class="text-center mb-12 mt-20">
             <h3 class="text-3xl font-bold text-gray-900 uppercase tracking-widest">Прайс-лист</h3>
             <div class="w-24 h-1 bg-pink-400 mx-auto mt-4 rounded-full"></div>
         </div>

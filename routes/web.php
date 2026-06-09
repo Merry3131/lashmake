@@ -53,14 +53,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('specialists', SpecialistController::class);
     // crud таблицы Специалисты
     Route::resource('services', \App\Http\Controllers\Admin\ServiceController::class);
-
     // промежуточный шаг для сборки мастера
     Route::get('specialists/build/{user}', [SpecialistController::class, 'build'])->name('specialists.build');
-
     Route::resource('specialists', SpecialistController::class);
-
     // записи
     Route::resource('appointments', \App\Http\Controllers\Admin\AppointmentController::class);
+    // акции
+    Route::resource('promotions', \App\Http\Controllers\Admin\PromotionController::class);
 
 });
 

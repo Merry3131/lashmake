@@ -53,7 +53,7 @@
             Контент и Маркетинг
         </span>
                 <div class="space-y-1 px-4">
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+                    <a href="{{ route('admin.promotions.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
                         Акции и Скидки
                     </a>
                     <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">

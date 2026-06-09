@@ -14,67 +14,131 @@ use Illuminate\Support\Facades\DB;
 
 class WorkScheduleController extends Controller
 {
-    public function getAvailableSlots(Request $request){
-        //получаем параметры из ajax запроса
+    public function getAvailableSlots(Request $request)
+    {
+        // Обязательно требуем service_id, чтобы узнать длительность услуги
+        $request->validate([
+            'specialist_id' => 'required|exists:specialists,id',
+            'service_id'    => 'required|exists:services,id',
+            'date'          => 'required|date',
+        ]);
+
         $specID = $request->specialist_id;
+        $serviceID = $request->service_id;
         $date = $request->date;
         $now = Carbon::now();
 
-        // находим график мастера на этот день
+        // 1. Получаем расписание мастера
         $schedule = WorkSchedule::where('specialist_id', $specID)->whereDate('work_date', $date)->first();
 
-        // если записи нет или выходной у мастера - возвращаем пустой список
         if (!$schedule || $schedule->is_day_off){
             return response()->json([]);
         }
 
-        //генерируем время для записи
-        $slots = [];
-        $startTime = Carbon::createFromFormat('H:i:s', $schedule->start_time);
-        $endTime = Carbon::createFromFormat('H:i:s', $schedule->end_time);
-        $breakStart = Carbon::createFromFormat('H:i:s', $schedule->break_start);
-        $breakEnd = Carbon::createFromFormat('H:i:s', $schedule->break_end);
+        // 2. Находим мастера и вытаскиваем длительность услуги из level_service
+        $specialist = Specialist::findOrFail($specID);
 
-        //интервал по 30 минут
-        $intervals = CarbonInterval::minutes(30)->toPeriod($startTime, $endTime);
+        $levelService = DB::table('level_service')
+            ->where('service_id', $serviceID)
+            ->where('level_id', $specialist->level_id)
+            ->first();
 
-        foreach ($intervals as $slot){
-            $currentSlot = $slot->format('H:i');
-            // проверка на прошедшее время
-            if ($date == $now->toDateString() && $slot->format('H:i') <= $now->format('H:i')){
-                continue;
-            }
-            //проверка на перерыв
-            $isInsideBreak = ($currentSlot >= $breakStart->format('H:i') && $currentSlot < $breakEnd->format('H:i'));
-
-            //проверка на конец смены
-            if(!$isInsideBreak && $currentSlot < $endTime->format('H:i')){
-                $slots[] = $currentSlot;
-            }
+        if (!$levelService) {
+            return response()->json(['error' => 'Тариф для мастера и услуги не найден'], 422);
         }
 
-        // ==================== ВОТ ЭТОТ БЛОК МЫ ЗАМЕНИЛИ ====================
-        // Сверка с занятыми записями (с возможностью исключить текущую редактируемую запись)
+        // Длительность услуги в минутах (например, 120 или 150)
+        $durationMinutes = (int) $levelService->duration;
+
+        // 3. Собираем уже занятые визиты на этот день
         $bookedSlotsQuery = Appointment::where('specialist_id', $specID)
             ->whereDate('appointment_at', $date)
             ->whereIn('status', ['pending', 'confirmed']);
 
-        // Добавляем эту проверку: если передали ID редактируемой записи, не считаем её занятой
         if ($request->filled('ignore_appointment_id')) {
             $bookedSlotsQuery->where('id', '!=', $request->ignore_appointment_id);
         }
 
-        $bookedSlots = $bookedSlotsQuery->pluck('appointment_at')
-            ->map(function($datetime){
-                return Carbon::parse($datetime)->format('H:i');
-            })
-            ->toArray();
-        // ===================================================================
+        // Получаем занятые интервалы в виде объектов Carbon (чтобы удобно сравнивать)
+        $appointments = $bookedSlotsQuery->get(['appointment_at', 'service_id'])
+            ->map(function($app) use ($specialist) {
+                $startTime = Carbon::parse($app->appointment_at);
 
-        //убираем занятое время из общего списка
-        $availableSlots = array_values(array_diff($slots, $bookedSlots));
+                // Нам нужно знать, сколько длится уже занятая услуга, чтобы построить её конец
+                $appLevelService = DB::table('level_service')
+                    ->where('service_id', $app->service_id)
+                    ->where('level_id', $specialist->level_id)
+                    ->first();
 
-        return response()->json($availableSlots);
+                $appDuration = $appLevelService ? (int)$appLevelService->duration : 60; // дефолт 60 мин, если не нашли
+                $endTime = (clone $startTime)->addMinutes($appDuration);
+
+                return [
+                    'start' => $startTime,
+                    'end' => $endTime
+                ];
+            });
+
+        // 4. Генерируем потенциальные слоты (шаг начала записи оставляем 30 минут)
+        $slots = [];
+
+        // Переводим границы дня в объекты Carbon для точного сравнения
+        $dayStart = Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . $schedule->start_time);
+        $dayEnd = Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . $schedule->end_time);
+        $dayBreakStart = Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . $schedule->break_start);
+        $dayBreakEnd = Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . $schedule->break_end);
+
+        // Начинаем проверку с самого начала рабочего дня мастера
+        $currentPointer = clone $dayStart;
+
+        // Крутим цикл, пока маркер времени не дошел до конца рабочего дня
+        while ($currentPointer < $dayEnd) {
+
+            // Время гипотетического окончания процедуры
+            $slotStart = clone $currentPointer;
+            $slotEnd = (clone $slotStart)->addMinutes($durationMinutes);
+
+            // А: Если проверяем сегодняшний день, нельзя предлагать время, которое уже прошло
+            if ($date == $now->toDateString() && $slotStart <= $now) {
+                // Сдвигаем указатель на 30 минут вперед, чтобы найти ближайшее будущее время
+                $currentPointer->addMinutes(30);
+                continue;
+            }
+
+            // Б: Проверка, что процедура целиком влезает до конца рабочего дня
+            if ($slotEnd > $dayEnd) {
+                break; // Если не влезает до закрытия салона — дальше искать нет смысла
+            }
+
+            // В: Проверка на пересечение с обеденным перерывом
+            // Сеанс пересекается с обедом, если начинается раньше конца обеда И заканчивается позже начала обеда
+            if ($slotStart < $dayBreakEnd && $slotEnd > $dayBreakStart) {
+                // Важно! Вместо того чтобы ломать всё, мы просто переносим начало записи на конец обеда
+                $currentPointer = clone $dayBreakEnd;
+                continue;
+            }
+
+            // Г: Проверка на пересечение с уже существующими записями других клиентов
+            $isIntersected = false;
+            foreach ($appointments as $booked) {
+                if ($slotStart < $booked['end'] && $slotEnd > $booked['start']) {
+                    $isIntersected = true;
+                    // Если наткнулись на чужую запись, переносим наш маркер на время окончания этой записи
+                    $currentPointer = clone $booked['end'];
+                    break;
+                }
+            }
+
+            // Если все проверки пройдены удачно — это наш честный слот!
+            if (!$isIntersected) {
+                $slots[] = $slotStart->format('H:i');
+
+                // Шагаем маркером СТРОГО на длительность выполненной услуги (например, на 2 часа вперед)
+                $currentPointer = clone $slotEnd;
+            }
+        }
+
+        return response()->json($slots);
     }
 
     // создание новой записи на услугу
@@ -149,17 +213,17 @@ class WorkScheduleController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Вы успешно з111аписались!',
+                'message' => 'Вы успешно записались!',
                 'data'    => $appointment
             ], 201);
 
         } catch (\Exception $e) {
             // Это запишет детальный текст ошибки (какой именно файл или строка упали) в файл storage/logs/laravel.log
-            \Log::error('Критическая ошибка при создании записи цветок: ' . $e->getMessage() . ' в файле ' . $e->getFile() . ' на строке ' . $e->getLine());
+            \Log::error('Критическая ошибка при создании записи: ' . $e->getMessage() . ' в файле ' . $e->getFile() . ' на строке ' . $e->getLine());
 
             return response()->json([
                 'success' => false,
-                'message' => 'Внутренняя ошибка сервера цветок: ' . $e->getMessage()
+                'message' => 'Внутренняя ошибка сервера: ' . $e->getMessage()
             ], 500);
         }
     }
