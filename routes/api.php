@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\WorkScheduleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -14,3 +15,7 @@ Route::get('/slots', [WorkScheduleController::class, 'getAvailableSlots']);
 
 // сохраняем запись клиента
 Route::post('/appointments', [WorkScheduleController::class, 'store']);
+
+Route::get('/level-service-info', [BookingController::class, 'getLevelServiceInfo']);
+
+Route::get('/specialist/{id}', [BookingController::class, 'getSpecialist']);

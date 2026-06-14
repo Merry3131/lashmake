@@ -9,8 +9,8 @@ class TeamController extends Controller
 {
     public function index()
     {
-        // все мастера с данными из таблицы users
-        $team = Specialist::with(['service_specialist.category', 'user'])->get();
+        // Подгружаем отзывы вместе с мастерами, чтобы избежать N+1 запросов
+        $team = Specialist::with(['service_specialist.category', 'user', 'level', 'reviews'])->get();
 
         return view('public.team', compact('team'));
     }

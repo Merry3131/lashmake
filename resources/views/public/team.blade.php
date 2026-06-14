@@ -1,52 +1,147 @@
 <x-app-layout title="Центр Ресниц | Специалисты">
-    <section class="max-w-7xl mx-auto pt-32 pb-20 px-6">
-        {{-- мастера --}}
-        <div class="text-center mb-20">
-            <h2 class="text-4xl lg:text-5xl font-serif text-gray-900 uppercase tracking-widest mb-4">Наши мастера</h2>
-            <div class="w-24 h-1 bg-pink-400 mx-auto rounded-full"></div>
-            <p class="text-gray-500 italic mt-6 text-lg">Профессионалы, которым доверяют свой взгляд</p>
+
+    {{-- Применяем шрифты Playfair Display и Manrope --}}
+    <style>
+        /* Все заголовки и элементы с классом font-serif получают Playfair Display */
+        h1, h2, h3, h4, h5, h6,
+        .font-serif,
+        [class*="font-serif"] {
+            font-family: 'Playfair Display', serif !important;
+        }
+
+        /* Основной текст — Manrope */
+        body, p, span, button, a, li, div,
+        .text-gray-600, .text-gray-500, .text-gray-400,
+        .tracking-widest, .uppercase,
+        input, textarea, select {
+            font-family: 'Manrope', sans-serif;
+        }
+
+        /* Для кнопок и ссылок сохраняем Manrope */
+        button, a, .btn {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+
+    {{-- 1. ШАПКА СТРАНИЦЫ (ПОЛНОШИРИННАЯ С ФОНОМ) --}}
+    <div class="w-full bg-cover bg-center pt-16 pb-16 relative" style="background-image: url('{{ asset('img/bg_main.png') }}');">
+        {{-- Градиентное наложение для размытия нижнего края в цвет фона --}}
+        <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-gray-100 to-transparent pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h2 class="text-3xl lg:text-4xl font-normal text-[#1e1f22] tracking-widest uppercase mb-4 font-serif">
+                Наши специалисты
+            </h2>
+            <div class="w-24 h-0.5 bg-[#ff5c8a] mx-auto mb-4 rounded-full"></div>
+            <p class="text-sm text-[#7c7e8c] font-light tracking-wide">
+                Команда профессионалов, влюбленных в свое дело
+            </p>
         </div>
+    </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-            @foreach($team as $member)
-                <div class="group relative bg-white rounded-[2rem] p-8 shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col items-center">
-                    <div class="relative w-48 h-48 mb-8">
-                        <div class="absolute inset-0 bg-pink-200 rounded-full rotate-6 group-hover:rotate-12 transition-transform duration-500"></div>
-                        <div class="relative w-full h-full overflow-hidden rounded-full border-4 border-white shadow-md">
-                            <img src="{{ $member->user->avatar ?? '/img/team/default.jpg' }}"
-                                 alt="{{ $member->user->first_name }}"
-                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                        </div>
+    {{-- ================================================================== --}}
+    {{-- ОСНОВНОЙ КОНТЕЙНЕР ДЛЯ СПИСКА МАСТЕРОВ (ЗАЖАТ ПО ЦЕНТРУ)           --}}
+    {{-- ================================================================== --}}
+    <section class="max-w-7xl mx-auto pt-12 pb-24 px-6">
 
-                        <div class="absolute -bottom-2 -right-2 bg-pink-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg">
-                            {{ $member->experience_years }}+ года опыта
-                        </div>
-                    </div>
+        {{-- Группируем мастеров по имени уровня --}}
+        @foreach($team->groupBy('level.name') as $levelName => $members)
 
+            <div class="mb-20">
+                {{-- Заголовок и краткое описание отличий уровня мастера --}}
+                <div class="mb-8 border-l-4 border-[#ff5c8a] pl-4 space-y-1">
+                    <h3 class="text-2xl text-[#1e1f22] tracking-wide font-normal uppercase font-serif">
+                        @switch(mb_strtolower($levelName))
+                            @case('lead') ведущий специалист @break
+                            @case('top') топ-мастер @break
+                            @case('master') мастер @break
+                            @default {{ $levelName }}
+                        @endswitch
+                    </h3>
 
-                    <div class="text-center flex-grow">
-                    <span class="text-xs font-bold uppercase tracking-widest text-pink-400 mb-2 block">
-                        {{ $member->specialization ?? 'Lash-master' }}
-                    </span>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">
-                            {{ $member->user->first_name }} {{ $member->user->last_name }}
-                        </h3>
-                        <p class="text-gray-600 font-light leading-relaxed mb-6 text-sm">
-                            {{ $member->bio ?? 'Сертифицированный специалист по созданию идеального взгляда и уходу за ресницами.' }}
-                        </p>
-                    </div>
-
-
-                    <div class="w-full pt-6 border-t border-gray-50">
-                        <a href="#" class="block w-full py-3 rounded-full bg-gray-900 text-white font-medium hover:bg-pink-500 transition-colors duration-300">
-                            Записаться к мастеру
-                        </a>
-                    </div>
+                    <p class="text-xs text-[#7c7e8c] font-light tracking-wide max-w-2xl">
+                        @switch(mb_strtolower($levelName))
+                            @case('lead')
+                                Эксперт высшей категории, наставник команды и руководитель направлений. Обладает максимальной скоростью работы, филигранной техникой и опытом более 5 лет.
+                                @break
+                            @case('top')
+                                Специалист с повышенной квалификацией и багажом сотен идеальных работ. В совершенстве владеет сложными трендовыми эффектами и ультраточным моделированием взгляда.
+                                @break
+                            @case('master')
+                                Сертифицированный дипломированный профессионал. Безупречно выполняет базовые и классические техники, строго соблюдая все стандарты безопасности и качества нашей студии.
+                                @break
+                            @default
+                                Профессиональный специалист нашей студии.
+                        @endswitch
+                    </p>
                 </div>
-            @endforeach
-        </div>
-        <div class="mt-24 text-center">
-            <p class="text-gray-400 text-sm">Все наши специалисты проходят регулярное повышение квалификации</p>
-        </div>
+
+                {{-- Сетка для карточек этой категории --}}
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    @foreach($members as $member)
+                        {{-- Карточка мастера (добавлен класс group для изоляции ховер-эффекта) --}}
+                        <div class="group p-6 bg-white rounded-3xl border border-[#f1f1f5] flex flex-col sm:flex-row gap-6 items-center sm:items-start hover:shadow-xl hover:shadow-pink-200 transition-all duration-300">
+
+                            {{-- Фото мастера слева --}}
+                            <div class="relative w-44 h-44 flex-shrink-0 bg-[#f8f8fa] rounded-2xl overflow-hidden">
+                                @if($member->hasMedia('specialists'))
+                                    <img src="{{ $member->getFirstMediaUrl('specialists') }}"
+                                         class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105">
+                                @endif
+
+                                @if($member->specialization && mb_strtolower($member->specialization) === 'Руководитель')
+                                    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-[#bd0055] text-white text-[9px] tracking-widest uppercase px-3 py-1 rounded-full font-medium whitespace-nowrap">
+                                        Руководитель
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- Информация справа (растягивается на всю доступную ширину) --}}
+                            <div class="flex flex-col flex-grow text-center sm:text-left h-full justify-between">
+                                <div>
+                    <span class="text-[10px] font-normal uppercase tracking-widest text-pink-500 block mb-1">
+                        @switch(mb_strtolower($levelName))
+                            @case('lead') ведущий специалист @break
+                            @case('top') топ-мастер @break
+                            @case('master') мастер @break
+                            @default {{ mb_strtolower($member->specialization ?? $levelName) }}
+                        @endswitch
+                    </span>
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-3 justify-center sm:justify-start">
+                                        <h4 class="text-2xl font-normal text-[#1e1f22] group-hover:text-pink-500 transition-colors duration-300 font-serif">
+                                            {{ $member->user->first_name }} {{ $member->user->last_name }}
+                                        </h4>
+
+
+                                        <div class="flex items-center justify-center gap-1 bg-pink-50 px-2.5 py-0.5 rounded-full w-max mx-auto sm:mx-0 border border-pink-100">
+                                            <span class="text-xs font-semibold text-[#ff5c8a]">{{ $member->averageRating() }}</span>
+                                            <svg class="w-3.5 h-3.5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                            <span class="text-[10px] text-gray-400 font-light">({{ $member->reviews->count() }})</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-[#7c7e8c] font-light leading-relaxed mb-4">
+                                        {{ $member->bio ?? 'Сертифицированный специалист по созданию идеального взгляда.' }}
+                                    </p>
+                                </div>
+
+
+                                <div class="pt-2 flex justify-end">
+                                    <button x-data @click="$store.modalManager.openBooking({ specialist_id: {{ $member->id }} })"
+                                            class="opacity-0 group-hover:opacity-100 inline-block bg-pink-500 text-white rounded-xl py-3 px-6 text-xs tracking-wider uppercase font-normal transition-all duration-300 transform translate-x-4 group-hover:translate-x-0 hover:cursor-pointer w-full sm:w-auto text-center shadow-sm">
+                                        записаться к мастеру
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+        @endforeach
+
     </section>
+
 </x-app-layout>

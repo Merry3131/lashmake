@@ -1,1 +1,233 @@
-<?php
+@extends('admin.layouts.admin_menu')
+
+@section('title', 'Создание новой записи')
+
+@section('content')
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <div class="flex-1 flex flex-col overflow-y-auto"
+         x-data="{
+            userMode: '{{ old('user_mode', 'new') }}', {{-- 'new' или 'existing' --}}
+            selectedSpecialist: '{{ old('specialist_id') }}',
+            selectedService: '{{ old('service_id') }}',
+            selectedDate: '{{ old('appointment_date', date('Y-m-d')) }}',
+            selectedTime: '{{ old('appointment_time') }}',
+            availableSlots: [],
+            loading: false,
+
+            async loadSlots() {
+                if (!this.selectedSpecialist || !this.selectedDate || !this.selectedService) {
+                    this.availableSlots = [];
+                    return;
+                }
+
+                this.loading = true;
+
+                try {
+                    let response = await fetch(`/api/slots?specialist_id=${this.selectedSpecialist}&date=${this.selectedDate}&service_id=${this.selectedService}`);
+                    let slots = await response.json();
+
+                    this.availableSlots = slots;
+
+                    if (this.selectedTime && !this.availableSlots.includes(this.selectedTime)) {
+                        this.selectedTime = null;
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки слотов:', error);
+                } finally {
+                    this.loading = false;
+                }
+            }
+         }"
+         x-init="
+            loadSlots();
+            $watch('selectedSpecialist', () => loadSlots());
+            $watch('selectedDate', () => loadSlots());
+            $watch('selectedService', () => loadSlots());
+         ">
+
+        <main class="p-8">
+            <div class="max-w-xl bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                <h1 class="text-xl font-bold text-slate-800 mb-6">Создание новой записи</h1>
+
+                <form action="{{ route('admin.appointments.store') }}" method="POST" class="space-y-5">
+                    @csrf
+
+                    {{-- ВЫБОР РЕЖИМА КЛИЕНТА --}}
+                    <input type="hidden" name="user_mode" x-model="userMode">
+                    <div class="flex bg-slate-100 p-1 rounded-xl gap-1 mb-4">
+                        <button type="button"
+                                @click="userMode = 'new'"
+                                :class="userMode === 'new' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
+                                class="w-full py-2 text-xs font-bold rounded-lg transition-all uppercase tracking-wider">
+                            Новый клиент
+                        </button>
+                        <button type="button"
+                                @click="userMode = 'existing'"
+                                :class="userMode === 'existing' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
+                                class="w-full py-2 text-xs font-bold rounded-lg transition-all uppercase tracking-wider">
+                            Выбрать из базы
+                        </button>
+                    </div>
+
+                    {{-- ВАРИАНТ 1: НОВЫЙ КЛИЕНТ (Создание на лету) --}}
+                    <div x-show="userMode === 'new'" x-transition class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="name" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Имя клиента</label>
+                                <input type="text" id="name" name="name" value="{{ old('name') }}" ::required="userMode === 'new'"
+                                       class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
+                                @error('name')
+                                <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="last_name" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Фамилия</label>
+                                <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}"
+                                       class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
+                                @error('last_name')
+                                <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="phone" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Номер телефона</label>
+                            <input type="text" id="phone" name="phone" value="{{ old('phone') }}" ::required="userMode === 'new'" placeholder="+7 (999) 000-00-00"
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
+                            @error('phone')
+                            <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    {{-- ВАРИАНТ 2: СУЩЕСТВУЮЩИЙ ПОЛЬЗОВАТЕЛЬ --}}
+                    <div x-show="userMode === 'existing'" x-transition>
+                        <div>
+                            <label for="user_id" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Выберите клиента</label>
+                            <select id="user_id" name="user_id" ::required="userMode === 'existing'"
+                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
+                                <option value="">-- Выберите пользователя из списка --</option>
+                                @foreach(\App\Models\User::orderBy('last_name')->get() as $client)
+                                    <option value="{{ $client->id }}" {{ old('user_id') == $client->id ? 'selected' : '' }}>
+                                        {{ $client->last_name }} {{ $client->name }} ({{ $client->phone ?? $client->email }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('user_id')
+                            <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <hr class="border-slate-100 my-2">
+
+                    {{-- ВЫБОР УСЛУГИ --}}
+                    <div>
+                        <label for="service_id" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Услуга</label>
+                        <select id="service_id"
+                                name="service_id"
+                                x-model="selectedService"
+                                required
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
+                            <option value="">Выберите услугу</option>
+                            @foreach(\App\Models\Service::all() as $service)
+                                <option value="{{ $service->id }}">{{ $service->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('service_id')
+                        <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- ВЫБОР МАСТЕРА --}}
+                    <div>
+                        <label for="specialist_id" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Мастер</label>
+                        <select id="specialist_id"
+                                name="specialist_id"
+                                x-model="selectedSpecialist"
+                                required
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
+                            <option value="">Выберите мастера</option>
+                            @foreach(\App\Models\Specialist::with('user')->get() as $specialist)
+                                <option value="{{ $specialist->id }}">
+                                    {{ $specialist->user->last_name }} {{ $specialist->user->name }} ({{ $specialist->level->name ?? 'Мастер' }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('specialist_id')
+                        <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- ВЫБОР ДАТЫ --}}
+                    <div>
+                        <label for="appointment_date" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Выбрать дату</label>
+                        <input type="date"
+                               id="appointment_date"
+                               name="appointment_date"
+                               x-model="selectedDate"
+                               required
+                               min="{{ date('Y-m-d') }}"
+                               class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
+                        @error('appointment_date')
+                        <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- ВЫВОД СЛОТОВ ВРЕМЕНИ --}}
+                    <div class="mt-4">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+                            Доступное время
+                            <span x-show="loading" class="text-pink-500 text-xs ml-2 font-normal animate-pulse">(Загрузка слотов...)</span>
+                        </label>
+
+                        <input type="hidden" name="appointment_time" x-model="selectedTime" required>
+
+                        <template x-if="availableSlots.length === 0 && !loading && selectedSpecialist && selectedDate && selectedService">
+                            <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl text-amber-800 text-xs font-medium">
+                                ⚠️ У мастера нет свободных окон на указанную дату для этой услуги.
+                            </div>
+                        </template>
+
+                        <template x-if="!selectedSpecialist || !selectedDate || !selectedService">
+                            <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl text-slate-500 text-xs font-medium">
+                                💡 Выберите услугу, мастера и дату, чтобы увидеть доступное время.
+                            </div>
+                        </template>
+
+                        <div class="grid grid-cols-4 gap-2">
+                            <template x-for="slot in availableSlots" :key="slot">
+                                <button type="button"
+                                        @click="selectedTime = slot"
+                                        :class="selectedTime === slot
+                                            ? 'bg-pink-500 text-white border-pink-500 shadow-md shadow-pink-100 scale-[1.02]'
+                                            : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'"
+                                        class="py-2.5 text-center text-sm font-semibold rounded-xl border transition-all duration-150 cursor-pointer">
+                                    <span x-text="slot"></span>
+                                </button>
+                            </template>
+                        </div>
+
+                        @error('appointment_time')
+                        <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- КНОПКИ УПРАВЛЕНИЯ --}}
+                    <div class="flex gap-3 pt-4">
+                        <a href="{{ route('admin.appointments.index') }}"
+                           class="w-full py-3.5 text-center text-slate-700 font-bold rounded-xl transition-all tracking-wide text-xs uppercase bg-slate-100 hover:bg-slate-200">
+                            Отмена
+                        </a>
+                        <button type="submit"
+                                class="w-full py-3.5 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl transition-all shadow-md shadow-pink-100 tracking-wide text-xs uppercase">
+                            Создать запись
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+@endsection

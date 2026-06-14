@@ -1,127 +1,133 @@
 @extends('admin.layouts.admin_menu')
 
-@section('title', 'Список услуг')
+@section('title', 'Создание услуги')
 
 @section('content')
+    <div class="w-full font-['Manrope'] text-[#1e1f22]">
 
-
-
-    <div class="flex-1 flex flex-col overflow-y-auto">
-        <header class=" px-8 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-slate-800">Новая услуга</h1>
-            <a href="{{ route('admin.services.index') }}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
+        {{-- ВЕРХНЯЯ ЧАСТЬ: ЗАГОЛОВОК И НАЗАД --}}
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-gray-100">
+            <div>
+                <h1 class="text-2xl font-normal tracking-wider uppercase text-[#1e1f22] font-[Playfair_Display]">Новая услуга</h1>
+                <p class="text-xs text-[#7c7e8c] font-light mt-1">Добавление новой процедуры в прайс-лист студии красоты</p>
+            </div>
+            <a href="{{ route('admin.services.index') }}" class="text-xs uppercase tracking-wider text-[#7c7e8c] hover:text-[#ff5c8a] transition-colors duration-200 font-medium">
                 ← Назад к списку
             </a>
-        </header>
+        </div>
 
-        <main class="p-8">
-            <div class="max-w-xl bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+        {{-- ФОРМА СОЗДАНИЯ (ПОЛНАЯ ШИРИНА И ОДИН СТОЛБЕЦ) --}}
+        <main class="w-full">
+            <div class="w-full bg-white p-6 md:p-8 rounded-3xl border border-[#f1f1f5] shadow-sm text-left">
 
-                <form action="{{ route('admin.services.store') }}" method="POST" class="space-y-5">
+                <form action="{{ route('admin.services.store') }}" method="POST" class="space-y-6">
                     @csrf
 
-                    <div>
-                        <label for="display_name" class="block text-xl tracking-wider text-slate-500 mb-2">
-                            Название услуги
-                        </label>
-                        <input type="text"
-                               id="name"
-                               name="name"
-                               value="{{ old('name') }}"
-                               required
-                               class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all font-medium"
-                        />
+                    <div class="flex flex-col gap-6 w-full">
 
-                        @error('name')
-                        <p class="text-xs text-rose-500 font-semibold mt-1.5"> {{ $message }}</p>
-                        @enderror
-                    </div>
-
-
-                    <div>
-                        <label for="description" class="block text-xl tracking-wider text-slate-500 mb-2">
-                            Описание услуги
-                        </label>
-                        <textarea id="description"
-                                  name="description"
-                                  rows="4"
-                                  class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all font-medium"
-                                  placeholder="Опишите услугу для клиентов..."></textarea>
-
-                        @error('description')
-                        <p class="text-xs text-rose-500 font-semibold mt-1.5">⚠️ {{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">
-                            Категория услуги
-                        </label>
-
-                        <select name="category_id" id="category_id" class="w-full border-gray-200 focus:border-pink-500 focus:ring-pink-500 rounded-xl shadow-sm text-sm">
-                            <option value="">-- Выберите категорию --</option>
-
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->display_name }}
-                                </option>
-                            @endforeach
-                        </select>
-
-                        @error('category_id')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="block text-sm font-medium text-gray-700">
-                            Статус услуги (Активность на сайте)
-                        </label>
-
-                        <div class="flex items-center space-x-6">
-                            <label class="flex items-center cursor-pointer select-none">
-                                <input type="radio"
-                                       name="active"
-                                       value="1"
-                                       {{ old('active', '1') == '1' ? 'checked' : '' }}
-                                       class="w-4 h-4 text-pink-500 border-gray-300 focus:ring-pink-500 focus:ring-2">
-                                <span class="ml-2 text-sm text-gray-900 font-medium flex items-center">
-                                <span class="w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>
-                                    Активна
-                                </span>
+                        {{-- 1. Название услуги --}}
+                        <div class="w-full">
+                            <label for="name" class="block text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">
+                                Название услуги
                             </label>
-
-                            <label class="flex items-center cursor-pointer select-none">
-                                <input type="radio"
-                                       name="active"
-                                       value="0"
-                                       {{ old('active') == '0' ? 'checked' : '' }}
-                                       class="w-4 h-4 text-pink-500 border-gray-300 focus:ring-pink-500 focus:ring-2">
-                                <span class="ml-2 text-sm text-gray-900 font-medium flex items-center">
-                                <span class="w-2 h-2 rounded-full bg-red-400 mr-1.5"></span>
-                                    Недоступна
-                                </span>
-                            </label>
+                            <input type="text"
+                                   id="name"
+                                   name="name"
+                                   value="{{ old('name') }}"
+                                   required
+                                   placeholder="Например: Классическое наращивание ресниц"
+                                   class="block w-full rounded-xl border border-[#f1f1f5] bg-[#f8f8fa] focus:border-[#ff5c8a] focus:ring-[#ff5c8a]/20 text-sm p-3 transition-colors duration-200 outline-none font-light" />
+                            @error('name')
+                            <p class="text-xs text-rose-500 font-light mt-1">⚠️ {{ $message }}</p>
+                            @enderror
                         </div>
 
-                        @error('active')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
+                        {{-- 2. Категория услуги --}}
+                        <div class="w-full">
+                            <label for="category_id" class="block text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">
+                                Категория процедуры
+                            </label>
+                            <select name="category_id"
+                                    id="category_id"
+                                    required
+                                    class="block w-full rounded-xl border border-[#f1f1f5] bg-[#f8f8fa] focus:border-[#ff5c8a] focus:ring-[#ff5c8a]/20 text-sm p-3 transition-colors duration-200 outline-none font-light appearance-none">
+                                <option value="" disabled selected>Выберите категорию...</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->display_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('category_id')
+                            <p class="text-xs text-rose-500 font-light mt-1">⚠️ {{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- 3. Доступность (Активность) --}}
+                        <div class="w-full">
+                            <span class="block text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium mb-2.5">
+                                Доступность для онлайн-записи
+                            </span>
+                            <div class="flex flex-col sm:flex-row gap-4 sm:items-center h-auto sm:h-11">
+                                <label class="inline-flex items-center cursor-pointer select-none">
+                                    <input type="radio"
+                                           name="active"
+                                           value="1"
+                                           {{ old('active', '1') == '1' ? 'checked' : '' }}
+                                           class="w-4 h-4 text-[#ff5c8a] border-gray-300 focus:ring-[#ff5c8a]/20" />
+                                    <span class="ml-2 text-sm text-[#1e1f22] font-light flex items-center">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+                                        Активна и видна
+                                    </span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer select-none">
+                                    <input type="radio"
+                                           name="active"
+                                           value="0"
+                                           {{ old('active') == '0' ? 'checked' : '' }}
+                                           class="w-4 h-4 text-[#ff5c8a] border-gray-300 focus:ring-[#ff5c8a]/20" />
+                                    <span class="ml-2 text-sm text-[#1e1f22] font-light flex items-center">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5"></span>
+                                        Скрыта / Недоступна
+                                    </span>
+                                </label>
+                            </div>
+                            @error('active')
+                            <p class="text-xs text-rose-500 font-light mt-1">⚠️ {{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- 4. Описание услуги --}}
+                        <div class="w-full">
+                            <label for="description" class="block text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">
+                                Подробное описание услуги для клиентов
+                            </label>
+                            <textarea id="description"
+                                      name="description"
+                                      rows="4"
+                                      placeholder="Опишите особенности выполнения процедуры, используемые материалы, эффект и рекомендации..."
+                                      class="block w-full rounded-xl border border-[#f1f1f5] bg-[#f8f8fa] focus:border-[#ff5c8a] focus:bg-white focus:ring-[#ff5c8a]/20 text-sm p-3 transition-all duration-200 outline-none font-light resize-y">{{ old('description') }}</textarea>
+                            @error('description')
+                            <p class="text-xs text-rose-500 font-light mt-1">⚠️ {{ $message }}</p>
+                            @enderror
+                        </div>
+
                     </div>
 
-                    <div class="flex gap-2">
-                        <a href="{{ route('admin.services.index') }}" class="w-full py-3 text-black font-bold rounded-xl transition-all tracking-wide text-xs">
+                    {{-- КНОПКИ ДЕЙСТВИЙ --}}
+                    <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-50 w-full">
+                        <a href="{{ route('admin.services.index') }}"
+                           class="w-full sm:w-auto sm:px-8 py-3.5 border border-gray-200 text-gray-500 hover:text-[#1e1f22] hover:bg-gray-50 text-xs tracking-wider uppercase font-normal rounded-xl transition-all duration-200 text-center">
                             Отмена
                         </a>
-                        <button type="submit" class="w-full py-3.5 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl transition-all shadow-md shadow-pink-100 tracking-wide text-xs">
-                            Сохранить категорию
+                        <button type="submit"
+                                class="w-full sm:w-auto sm:px-8 py-3.5 bg-[#ff5c8a] hover:bg-[#e04b75] text-white text-xs tracking-wider uppercase font-normal rounded-xl transition-all duration-300 shadow-sm cursor-pointer">
+                            Сохранить услугу
                         </button>
                     </div>
-                </form>
 
+                </form>
             </div>
         </main>
     </div>
-
-
 @endsection

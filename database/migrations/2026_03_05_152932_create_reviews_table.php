@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('specialist_id')->constrained('specialists')->onDelete('cascade');
             $table->unsignedTinyInteger('rating');
             $table->text('comment')->nullable();
+            $table->boolean('is_approved')->default(false);
             $table->timestamps();
         });
     }

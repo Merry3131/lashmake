@@ -3,86 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Lashmake Admin')</title>
+    <title>@yield('title', 'Center of Lashes Admin')</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-slate-100 font-sans">
+<body class="bg-[#fafafc] font-['Manrope'] text-[#1e1f22]">
 
 <div class="flex h-screen overflow-hidden">
-    <div class="w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0">
-        <div class="p-5 text-xl font-bold text-white tracking-wider border-b border-slate-800">
-            Lashmake Admin
+    {{-- БОКОВОЕ МЕНЮ (САЙДБАР) --}}
+    <div class="w-64 bg-white text-[#1e1f22] flex flex-col shrink-0 border-r border-[#f1f1f5]">
+        {{-- ЛОГОТИП СТУДИИ --}}
+        <div class="p-6 text-lg font-normal tracking-wider uppercase text-[#1e1f22] border-b border-[#f1f1f5] font-[Playfair_Display]">
+            Центр ресниц
+            Админ-панель
         </div>
+
+        {{-- НАВИГАЦИЯ --}}
         <nav class="flex-1 p-4 space-y-6 overflow-y-auto">
 
+            {{-- РАЗДЕЛ: ОПЕРАЦИОННАЯ РАБОТА --}}
             <div>
-        <span class="px-4 text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">
-            Операционная работа
-        </span>
-                <div class="space-y-1 px-4">
-                    <a href="{{ route('admin.appointments.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+                <span class="px-4 text-[10px] font-semibold text-pink-500 uppercase tracking-widest block mb-2.5">
+                    Операционная работа
+                </span>
+                <div class="space-y-1.5 px-2">
+                    <a href="{{ route('admin.appointments.index') }}"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-light text-[#1e1f22] hover:bg-[#fafafc] hover:text-[#ff5c8a] transition-all duration-200">
                         Записи на услуги
                     </a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+                    <a href="{{ route('admin.specialists.index') }}"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-light text-[#1e1f22] hover:bg-[#fafafc] hover:text-[#ff5c8a] transition-all duration-200">
+                        Мастера салона
+                    </a>
+                    <a href="{{ route('admin.categories.index') }}"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-light text-[#1e1f22] hover:bg-[#fafafc] hover:text-[#ff5c8a] transition-all duration-200">
+                        Категории услуг
+                    </a>
+                    <a href="{{ route('admin.services.index') }}"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-light text-[#1e1f22] hover:bg-[#fafafc] hover:text-[#ff5c8a] transition-all duration-200">
+                        Прайс-лист услуг
+                    </a>
+                    <a href="{{ route('admin.schedule.index') }}"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-light text-[#1e1f22] hover:bg-[#fafafc] hover:text-[#ff5c8a] transition-all duration-200">
                         График работы
                     </a>
                 </div>
             </div>
 
+            {{-- РАЗДЕЛ: КОНТЕНТ И НАСТРОЙКИ --}}
             <div>
-        <span class="px-4 text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">
-            Управление салоном
-        </span>
-                <div class="space-y-1 px-4">
-                    <a href="{{ route('admin.categories.index') }}"
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-medium
-                      {{ request()->routeIs('admin.categories.*') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-                        Категории услуг
-                    </a>
-                    <a href="{{ route('admin.services.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-                        Услуги
-                    </a>
-                    <a href="{{ route('admin.specialists.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-                        Специалисты (Мастера)
-                    </a>
-                </div>
-            </div>
-
-            <div>
-        <span class="px-4 text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">
-            Контент и Маркетинг
-        </span>
-                <div class="space-y-1 px-4">
-                    <a href="{{ route('admin.promotions.index') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+                <span class="px-4 text-[10px] font-semibold text-pink-500 uppercase tracking-widest block mb-2.5">
+                    Контент и настройки
+                </span>
+                <div class="space-y-1.5 px-2">
+                    <a href="{{ route('admin.promotions.index') }}"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-light text-[#1e1f22] hover:bg-[#fafafc] hover:text-[#ff5c8a] transition-all duration-200">
                         Акции и Скидки
                     </a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
+                    <a href="{{ route('admin.works.index') }}"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-light text-[#1e1f22] hover:bg-[#fafafc] hover:text-[#ff5c8a] transition-all duration-200">
                         Примеры работ
                     </a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all">
-                        Модерация отзывов
-                    </a>
+{{--                    <a href="#"--}}
+{{--                       class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-light text-[#1e1f22] hover:bg-[#fafafc] hover:text-[#ff5c8a] transition-all duration-200">--}}
+{{--                        Модерация отзывов--}}
+{{--                    </a>--}}
                 </div>
             </div>
 
         </nav>
-        <div class="p-4 border-t border-slate-800 flex flex-col gap-2">
-            <a href="{{ route('home') }}" class="px-4 py-2 text-sm text-slate-400 hover:text-white transition-all">
+
+        {{-- НИЖНЯЯ ПАНЕЛЬ С ДЕЙСТВИЯМИ --}}
+        <div class="p-4 border-t border-[#f1f1f5] flex flex-col gap-1.5 bg-[#fafafc]/50">
+            <a href="{{ route('home') }}"
+               class="px-4 py-2 text-xs font-light text-[#7c7e8c] hover:text-[#1e1f22] transition-colors duration-200">
                 ← На главную сайта
             </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:text-red-300 transition-all cursor-pointer">
+                <button type="submit"
+                        class="w-full text-left px-4 py-2 text-xs font-normal text-rose-500 hover:text-rose-600 transition-colors duration-200 cursor-pointer">
                     Выйти из системы
                 </button>
             </form>
         </div>
     </div>
 
-    <div class="flex-1 flex flex-col overflow-y-auto">
-        <main class="p-8">
-            @yield('content')
-        </main>
+    {{-- ОСНОВНОЙ КОНТЕНТ СТРАНИЦЫ --}}
+    <div class="flex-1 flex flex-col overflow-y-auto bg-[#fafafc] p-8 md:p-12">
+        @yield('content')
     </div>
 </div>
 

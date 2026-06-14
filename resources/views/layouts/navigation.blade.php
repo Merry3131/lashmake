@@ -18,7 +18,7 @@
                         Услуги
                     </x-nav-link>
                     <x-nav-link :href="url('/team')" :active="request()->is('team*')">
-                        Специалисты
+                        Специалисты`
                     </x-nav-link>
                     <x-nav-link :href="url('/reviews')" :active="request()->is('reviews*')">
                         Отзывы
@@ -26,6 +26,13 @@
                     <x-nav-link :href="url('/example_of_works')" :active="request()->is('example_of_works*')">
                         Примеры работ
                     </x-nav-link>
+                    @auth
+                        @if(Auth::user()->role === 'master')
+                            <x-nav-link :href="url('/schedule')" :active="request()->is('master/schedule*')" class="text-pink-600 font-medium">
+                                Расписание
+                            </x-nav-link>
+                        @endif
+                    @endauth
                 </div>
 
                 <div class="flex items-center">

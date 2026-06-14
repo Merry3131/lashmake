@@ -16,10 +16,10 @@ return new class extends Migration
 
             $table->foreignId('specialist_id')->constrained('specialists')->onDelete('cascade');
             $table->date('work_date');
-            $table->time('start_time');
-            $table->time('end_time');
-            $table->time('break_start');
-            $table->time('break_end');
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
+            $table->time('break_start')->nullable();
+            $table->time('break_end')->nullable();
             $table->boolean('is_day_off')->default(false);
             $table->timestamps();
         });

@@ -26,7 +26,7 @@ class AppointmentsSeeder extends Seeder
                 'service_id' => 3,
                 'appointment_at' => Carbon::now()->addDays(2)->setTime(14, 30, 0),
                 'final_price' => 1500.00,
-                'status' => 'confirmed',
+                'status' => 'approved',
                 'notes' => 'Нужна коррекция воском.',
             ],
             [

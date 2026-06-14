@@ -26,7 +26,7 @@ class WorkScheduleController extends Controller
         $specID = $request->specialist_id;
         $serviceID = $request->service_id;
         $date = $request->date;
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Yekaterinburg');
 
         // 1. Получаем расписание мастера
         $schedule = WorkSchedule::where('specialist_id', $specID)->whereDate('work_date', $date)->first();
@@ -99,10 +99,14 @@ class WorkScheduleController extends Controller
             $slotEnd = (clone $slotStart)->addMinutes($durationMinutes);
 
             // А: Если проверяем сегодняшний день, нельзя предлагать время, которое уже прошло
-            if ($date == $now->toDateString() && $slotStart <= $now) {
-                // Сдвигаем указатель на 30 минут вперед, чтобы найти ближайшее будущее время
-                $currentPointer->addMinutes(30);
-                continue;
+            // А: Если проверяем сегодняшний день, нельзя предлагать время, которое уже прошло
+            if ($date == $now->toDateString()) {
+                // Создаем объект текущего времени в формате "H:i" для простого сравнения строк
+                // или сравниваем напрямую объекты Carbon с учетом правильной таймзоны
+                if ($slotStart->timezone('Europe/Moscow') <= $now) {
+                    $currentPointer->addMinutes(30);
+                    continue;
+                }
             }
 
             // Б: Проверка, что процедура целиком влезает до конца рабочего дня
@@ -160,6 +164,16 @@ class WorkScheduleController extends Controller
             'time'          => 'required|string',
         ]);
 
+        $targetSpecialist = Specialist::find($validated['specialist_id']);
+
+        // Сравниваем ID текущего юзера с user_id выбранного мастера
+        if ($targetSpecialist && Auth::id() == $targetSpecialist->user_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Вы не можете записаться на услугу к самому себе.'
+            ], 422); // 422 Unprocessable Entity — идеальный статус для бизнес-логики
+        }
+
         try {
             // 3. Безопасное склеивание даты и времени через специальный метод Carbon
             // Из "2026-05-20" и "14:30" создаем полноценный объект даты-времени
@@ -210,6 +224,11 @@ class WorkScheduleController extends Controller
                 'final_price'    => $levelService->price, // Обязательное поле для БД
                 'status'         => 'pending'
             ]);
+
+            $user = Auth::user();
+            if ($user) {
+                $user->notify(new \App\Notifications\AppointmentNotification($appointment, 'created'));
+            }
 
             return response()->json([
                 'success' => true,

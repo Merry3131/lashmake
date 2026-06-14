@@ -22,6 +22,15 @@ class ProfileController extends Controller
         ]);
     }
 
+
+    public function clearNotifications(Request $request)
+    {
+        // Удаляем все уведомления вошедшего пользователя
+        $request->user()->notifications()->delete();
+
+        return redirect()->route('dashboard')->with('success', 'все уведомления успешно удалены.');
+    }
+
     /**
      * Update the user's profile information.
      */

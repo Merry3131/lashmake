@@ -26,4 +26,9 @@ class ServiceController extends Controller
         return view('public.services', compact('categories', 'promotions'));
 
     }
+
+    public function show(Service $service)
+    {
+        return view('public.services-show', compact('service'));
+    }
 }

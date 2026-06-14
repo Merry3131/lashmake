@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('service_id')->constrained('services')->onDelete('cascade');
             $table->datetime('appointment_at');
             $table->decimal('final_price', 10, 2);
-            $table->enum('status', ['pending', 'confirmed', 'completed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'completed', 'cancelled'])->default('pending');
             $table->dateTime('prepayment_deadline')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();

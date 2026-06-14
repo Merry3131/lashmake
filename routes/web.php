@@ -8,9 +8,11 @@ use App\Http\Controllers\MainPageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\WorkScheduleController;
+use App\Http\Middleware\MasterMiddleware;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,12 +24,16 @@ Route::get('/', MainPageController::class)->name('home');
 Route::get('/promotions', PromotionController::class)->name('promotions.index');
 // услуги
 Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
 // специалисты
 Route::get('/team', [TeamController::class, 'index'])->name('team.index');
 // примеры работ
 Route::get('/example_of_works', [ExamplesOfWorkController::class, 'index'])->name('works.index');
 // отзывы
 Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+Route::get('/reviews/create', [ReviewController::class, 'create'])->name('reviews.create');
+Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+Route::delete('/notifications/clear', [App\Http\Controllers\ProfileController::class, 'clearNotifications'])->name('notifications.clear');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -39,6 +45,14 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/api/appointments', [WorkScheduleController::class, 'store']);
+
+
+
+
+});
+
+Route::middleware(MasterMiddleware::class)->group(function () {
+    Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
 });
 
 //роуты админа
@@ -60,6 +74,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('appointments', \App\Http\Controllers\Admin\AppointmentController::class);
     // акции
     Route::resource('promotions', \App\Http\Controllers\Admin\PromotionController::class);
+    Route::get('/promotions/get-price', [App\Http\Controllers\Admin\PromotionController::class, 'getPrice'])->name('promotions.get-price');
+    Route::resource('works', \App\Http\Controllers\Admin\ExampleOfWorkController::class);
+    // график работы
+    Route::resource('/schedule', \App\Http\Controllers\Admin\WorkScheduleController::class);
 
 });
 

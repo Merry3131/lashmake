@@ -1,93 +1,100 @@
 @extends('admin.layouts.admin_menu')
 
-@section('title', 'Список мастеров')
+@section('title', 'Редактирование мастера')
 
 @section('content')
+    <div class="w-full font-['Manrope'] text-[#1e1f22]">
 
-    <div class="flex-1 flex flex-col overflow-y-auto">
-        <header class=" px-8 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-slate-800">Редактирование мастера: {{ $specialist->user->last_name }} {{ $specialist->user->first_name }}</h1>
-            <a href="{{ route('admin.specialists.index') }}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">
+        {{-- ВЕРХНЯЯ ЧАСТЬ: ЗАГОЛОВОК И НАЗАД --}}
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-gray-100">
+            <div>
+                <h1 class="text-2xl font-normal tracking-wider uppercase text-[#1e1f22] font-[Playfair_Display]">Редактирование мастера</h1>
+                <p class="text-xs text-[#7c7e8c] font-light mt-1">
+                    Изменение профиля специалиста: <span class="font-normal text-[#ff5c8a]">{{ $specialist->user->last_name }} {{ $specialist->user->first_name }}</span>
+                </p>
+            </div>
+            <a href="{{ route('admin.specialists.index') }}" class="text-xs uppercase tracking-wider text-[#7c7e8c] hover:text-[#ff5c8a] transition-colors duration-200 font-medium">
                 ← Назад к списку
             </a>
-        </header>
+        </div>
 
-        <main class="p-8">
-            <div class="max-w-xl bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+        {{-- ФОРМА РЕДАКТИРОВАНИЯ (ПОЛНАЯ ШИРИНА И ОДИН СТОЛБЕЦ) --}}
+        <main class="w-full">
+            <div class="w-full bg-white p-6 md:p-8 rounded-3xl border border-[#f1f1f5] shadow-sm text-left">
 
-                <form action="{{ route('admin.specialists.update', $specialist->id) }}" method="POST" class="space-y-5">
+                <form action="{{ route('admin.specialists.update', $specialist->id) }}" method="POST" class="space-y-6">
                     @csrf
                     @method('PUT')
 
-                    <div>
-                        <label for="level_id" class="block text-xl tracking-wider text-slate-500 mb-2">
-                            Уровень мастера
-                        </label>
+                    <div class="flex flex-col gap-6 w-full">
 
-                        <select name="level_id" id="level_id" required
-                                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-500/50 focus:ring-4 focus:ring-pink-505/10 transition-all">
-                            <option value="">-- Выберите категорию --</option>
+                        {{-- 1. Уровень мастера --}}
+                        <div class="w-full">
+                            <label for="level_id" class="block text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">
+                                Уровень мастера
+                            </label>
+                            <select name="level_id"
+                                    id="level_id"
+                                    required
+                                    class="block w-full rounded-xl border border-[#f1f1f5] bg-[#f8f8fa] focus:border-[#ff5c8a] focus:ring-[#ff5c8a]/20 text-sm p-3 transition-colors duration-200 outline-none font-light appearance-none">
+                                @foreach($levels as $level)
+                                    <option value="{{ $level->id }}" {{ old('level_id', $specialist->level_id) == $level->id ? 'selected' : '' }}>
+                                        {{ $level->display_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('level_id')
+                            <p class="text-xs text-rose-500 font-light mt-1">⚠️ {{ $message }}</p>
+                            @enderror
+                        </div>
 
-                            @foreach($levels as $level)
-                                <option value="{{ $level->id }}"
-                                    {{ old('level_id', $specialist->level_id) == $level->id ? 'selected' : '' }}>
-                                    {{ $level->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                        {{-- 2. Опыт работы --}}
+                        <div class="w-full">
+                            <label for="experience" class="block text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">
+                                Опыт работы
+                            </label>
+                            <input type="text"
+                                   id="experience"
+                                   name="experience"
+                                   value="{{ old('experience', $specialist->experience) }}"
+                                   required
+                                   class="block w-full rounded-xl border border-[#f1f1f5] bg-[#f8f8fa] focus:border-[#ff5c8a] focus:ring-[#ff5c8a]/20 text-sm p-3 transition-colors duration-200 outline-none font-light" />
+                            @error('experience')
+                            <p class="text-xs text-rose-500 font-light mt-1">⚠️ {{ $message }}</p>
+                            @enderror
+                        </div>
 
-                        @error('level_id')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
+                        {{-- 3. Описание / Биография --}}
+                        <div class="w-full">
+                            <label for="bio" class="block text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">
+                                Описание
+                            </label>
+                            <textarea id="bio"
+                                      name="bio"
+                                      rows="4"
+                                      placeholder="Опишите услугу для клиентов..."
+                                      class="block w-full rounded-xl border border-[#f1f1f5] bg-[#f8f8fa] focus:border-[#ff5c8a] focus:bg-white focus:ring-[#ff5c8a]/20 text-sm p-3 transition-all duration-200 outline-none font-light resize-y">{{ old('bio', $specialist->bio) }}</textarea>
+                            @error('bio')
+                            <p class="text-xs text-rose-500 font-light mt-1">⚠️ {{ $message }}</p>
+                            @enderror
+                        </div>
+
                     </div>
 
-
-                    <div>
-                        <label for="experience" class="block text-xl tracking-wider text-slate-500 mb-2">
-                            Опыт работы
-                        </label>
-                        <input type="text"
-                               id="experience"
-                               name="experience"
-                               value="{{ old('experience', $specialist->experience) }}"
-                               required
-                               class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all font-medium"
-                        />
-
-                        @error('experience')
-                        <p class="text-xs text-rose-500 font-semibold mt-1.5"> {{ $message }}</p>
-                        @enderror
-                    </div>
-
-
-                    <div>
-                        <label for="bio" class="block text-xl tracking-wider text-slate-500 mb-2">
-                            Описание
-                        </label>
-                        <textarea id="bio"
-                                  name="bio"
-                                  rows="4"
-                                  class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all font-medium"
-                                  placeholder="Опишите услугу для клиентов...">{{ old('bio', $specialist->bio) }}</textarea>
-
-                        @error('bio')
-                        <p class="text-xs text-rose-500 font-semibold mt-1.5">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="flex gap-2">
-                        <a href="{{ route('admin.specialists.index') }}" class="w-full py-3 text-black font-bold rounded-xl transition-all tracking-wide text-xs">
+                    {{-- КНОПКИ ДЕЙСТВИЙ --}}
+                    <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-50 w-full">
+                        <a href="{{ route('admin.specialists.index') }}"
+                           class="w-full sm:w-auto sm:px-8 py-3.5 border border-gray-200 text-gray-500 hover:text-[#1e1f22] hover:bg-gray-50 text-xs tracking-wider uppercase font-normal rounded-xl transition-all duration-200 text-center">
                             Отмена
                         </a>
-                        <button type="submit" class="w-full py-3.5 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl transition-all shadow-md shadow-pink-100 tracking-wide text-xs">
+                        <button type="submit"
+                                class="w-full sm:w-auto sm:px-8 py-3.5 bg-[#ff5c8a] hover:bg-[#e04b75] text-white text-xs tracking-wider uppercase font-normal rounded-xl transition-all duration-300 shadow-sm cursor-pointer">
                             Обновить
                         </button>
                     </div>
-                </form>
 
+                </form>
             </div>
         </main>
     </div>
-
-
 @endsection

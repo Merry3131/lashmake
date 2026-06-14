@@ -19,7 +19,6 @@ class PromotionsSeeder extends Seeder
                 'service_id' => 1, // Объём 2д
                 'specialist_id' => 2, // Надежда (Top-master)
                 'title' => 'Весеннее преображение: -15% у Надежды',
-                'type' => 'discount',
                 'discount_percent' => 15,
                 'start_date' => Carbon::now(),
                 'end_date' => Carbon::now()->addMonths(1),
@@ -28,7 +27,6 @@ class PromotionsSeeder extends Seeder
                 'service_id' => 2, // Ламинирование ресниц
                 'specialist_id' => 4, // Дарья (Top-master)
                 'title' => 'Знакомство с новым мастером Дарьей',
-                'type' => 'discount',
                 'discount_percent' => 20,
                 'start_date' => Carbon::now(),
                 'end_date' => Carbon::now()->addMonths(2),
@@ -37,7 +35,6 @@ class PromotionsSeeder extends Seeder
                 'service_id' => 3, // Классика 1д
                 'specialist_id' => 2, // Акция действует у всех
                 'title' => 'Счастливые часы: -10% на классику',
-                'type' => 'discount',
                 'discount_percent' => 10,
                 'start_date' => Carbon::now(),
                 'end_date' => Carbon::now()->addYear(),

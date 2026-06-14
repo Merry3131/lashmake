@@ -33,40 +33,40 @@
         <div class="bg-white border border-[#f1f1f5] rounded-3xl shadow-sm overflow-hidden">
             <table class="w-full text-left border-collapse">
                 <thead>
-                <tr class="bg-[#f5f5f7] border-b border-[#e2e2e9] text-xs text-[#7c7e8c] tracking-wide">
-                    <th class="py-5 px-8">название акции</th>
-                    <th class="py-5 px-6">услуга</th>
-                    <th class="py-5 px-6">мастер</th>
-                    <th class="py-5 px-6 text-center">скидка</th>
-                    <th class="py-5 px-6">период действия</th>
-                    <th class="py-5 px-8 text-right">действия</th>
-                </tr>
+                    <tr class="bg-[#f5f5f7] border-b border-[#e2e2e9] text-xs text-[#7c7e8c] tracking-wide">
+                        <th class="py-5 px-8">название акции</th>
+                        <th class="py-5 px-6">услуга</th>
+                        <th class="py-5 px-6">мастер</th>
+                        <th class="py-5 px-6 text-center">скидка</th>
+                        <th class="py-5 px-6 text-center">цена со скидкой</th> {{-- новый столбец --}}
+                        <th class="py-5 px-6">период действия</th>
+                        <th class="py-5 px-8 text-right">действия</th>
+                    </tr>
                 </thead>
                 <tbody class="divide-y divide-[#f1f1f5] text-sm text-[#1e1f22]">
                 @forelse($promotions as $promotion)
-                    <tr class="hover:bg-[#fafafc] transition-colors duration-150">
-                        <td class="py-5 px-8 text-base text-[#1e1f22]">
-                            {{ $promotion->title }}
-                        </td>
-
-                        <td class="py-5 px-6 text-[#5c5e66]">
-                            {{ $promotion->service->name ?? 'Не указана' }}
-                        </td>
-
-                        <td class="py-5 px-6 text-[#5c5e66]">
+                    <tr>
+                        <td class="py-5 px-8">{{ $promotion->title }}</td>
+                        <td class="py-5 px-6">{{ $promotion->service->name ?? 'Не указана' }}</td>
+                        <td class="py-5 px-6">
                             @if($promotion->specialist)
                                 {{ $promotion->specialist->user->first_name }} {{ $promotion->specialist->user->last_name }}
+                                <span class="text-xs text-[#9ca0b0] block">
+                    (уровень: {{ $promotion->specialist->level->display_name ?? $promotion->specialist->level->name ?? 'не задан' }})
+                </span>
                             @else
-                                Все мастера студии
+                                Все мастера
                             @endif
                         </td>
+                        <td class="py-5 px-6 text-center text-[#ff5c8a]">-{{ $promotion->discount_percent }}%</td>
+                        <td class="py-5 px-6 text-center font-medium text-[#1e1f22]">
+                            {{ $promotion->price_display }}
+                            @if($promotion->specialist && ($personal = $promotion->getDiscountedPrices()) && !empty($personal))
 
-                        <td class="py-5 px-6 text-center text-[#ff5c8a] text-base">
-                            -{{ $promotion->discount_percent }}%
+                            @endif
                         </td>
-
                         <td class="py-5 px-6 text-xs text-[#9ca0b0]">
-                            {{ date_format(date_create($promotion->start_date), 'd.m.Y') }} — {{ date_format(date_create($promotion->end_date), 'd.m.Y') }}
+                            {{ date('d.m.Y', strtotime($promotion->start_date)) }} — {{ date('d.m.Y', strtotime($promotion->end_date)) }}
                         </td>
 
                         <td class="py-5 px-8 text-right">
@@ -76,7 +76,8 @@
                                     Изменить
                                 </a>
 
-                                <form action="{{ route('admin.promotions.destroy', $promotion->id) }}" method="POST" onsubmit="return confirm('Вы уверены?');" class="inline">
+                                <form action="{{ route('admin.promotions.destroy', $promotion->id) }}" method="POST"
+                                      onsubmit="return confirm('Вы уверены?');" class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"

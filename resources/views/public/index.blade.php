@@ -1,5 +1,28 @@
 <x-app-layout title="Центр Ресниц | Главная">
 
+    {{-- Применяем подключенные шрифты Playfair Display и Manrope --}}
+    <style>
+        /* Все заголовки и элементы с классом font-serif получают Playfair Display */
+        h1, h2, h3, h4, h5, h6,
+        .font-serif,
+        [class*="font-serif"] {
+            font-family: 'Playfair Display', serif !important;
+        }
+
+        /* Основной текст — Manrope */
+        body, p, span, button, a, li, div,
+        .text-gray-600, .text-gray-500, .text-gray-400,
+        .tracking-widest, .uppercase,
+        input, textarea, select {
+            font-family: 'Manrope', sans-serif;
+        }
+
+        /* Для кнопок и ссылок сохраняем Manrope */
+        button, a, .btn {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+
     <div class="relative bg-no-repeat bg-cover bg-center"
          style="background-image: url('{{ asset('img/bg_main.png') }}');">
 
@@ -20,9 +43,9 @@
             </div>
 
             <div class="relative z-10 w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left">
-            <span class="text-xs tracking-widest text-[#bd0055] font-light mb-4">
-                Студия красоты Алёны Хабибуллиной
-            </span>
+                <span class="text-xs tracking-widest text-[#bd0055] font-light mb-4">
+                    Студия красоты Алёны Хабибуллиной
+                </span>
                 <h1 class="text-4xl md:text-6xl font-serif text-gray-900 leading-tight">
                     Искусство быть собой
                 </h1>
@@ -32,8 +55,11 @@
 
                 <div class="mt-10 relative z-20 flex justify-between w-full">
                     <button x-data @click="$store.modalManager.openBooking()"
-                            class="bg-pink-500 text-white px-12 py-3.5 rounded-full text-sm font-light tracking-wide transition-all duration-500 shadow-md shadow-pink-950/10 hover:bg-pink-800 hover:shadow-lg hover:shadow-pink-900/20 transform hover:-translate-y-0.5 active:translate-y-0">
-                        Записаться онлайн
+                            class="group relative border border-pink-500 text-pink-600 px-12 py-3.5 rounded-full text-sm font-light tracking-wide shadow-sm transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-500 overflow-hidden bg-transparent hover:text-white  hover:shadow-lg hover:shadow-pink-900/20">
+                        {{-- Задний фон, который расширяется --}}
+                        <span class="absolute inset-0 bg-pink-500 scale-x-0 group-hover:scale-x-100 group-hover:bg-pink-500 origin-left transition-transform duration-500 ease-out pointer-events-none"></span>
+                        {{-- Текст поверх фона --}}
+                        <span class="relative z-10">Записаться онлайн</span>
                     </button>
                 </div>
             </div>
@@ -43,10 +69,14 @@
 
     <div class="bg-[#fcfaf7] pb-32 pt-20">
         <section class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
-            <div class="md:col-span-5 aspect-[4/5] bg-gray-200 relative shadow-sm overflow-hidden">
-                <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-xs uppercase tracking-widest p-4 text-center">
-                    [ Эстетичное фото инструментов/процесса ]
-                </div>
+
+            <div class="md:col-span-5 aspect-[4/5] bg-gray-100 relative shadow-md overflow-hidden rounded-2xl group">
+                <img src="{{ asset('img/in1.webp') }}"
+                     alt="Процесс создания идеального взгляда в Центр Ресниц"
+                     class="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700 ease-out">
+
+                {{-- Мягкий затемняющий градиент сверху, чтобы добавить глубины фотографии --}}
+                <div class="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent pointer-events-none"></div>
             </div>
 
             <div class="md:col-span-7 md:pl-8">
@@ -58,6 +88,7 @@
                     В нашей студии каждый клиент — это история. Мы используем только премиальные материалы и авторские техники, подбирая идеальный изгиб, длину и эффект индивидуально под форму ваших глаз и архитектуру лица.
                 </p>
             </div>
+
         </section>
     </div>
 
@@ -69,16 +100,20 @@
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                 @foreach($categories as $index => $category)
-                    <div class="bg-gray-200 relative group overflow-hidden min-h-[320px] md:min-h-[380px]
-                        {{ $index == 0 ? 'md:col-span-7' : '' }}
-                        {{ $index == 1 ? 'md:col-span-5' : '' }}
-                        {{ $index == 2 ? 'md:col-span-5' : '' }}
-                        {{ $index == 3 ? 'md:col-span-7' : '' }}
-                        {{ $index > 3 ? 'md:col-span-6' : '' }}">
+                    <div class="bg-gray-200 relative group overflow-hidden min-h-[320px] md:min-h-[380px] transition-all duration-500 rounded-2xl hover:z-30 hover:shadow-2xl hover:shadow-pink-500/30
+            {{ $index == 0 ? 'md:col-span-7' : '' }}
+            {{ $index == 1 ? 'md:col-span-5' : '' }}
+            {{ $index == 2 ? 'md:col-span-5' : '' }}
+            {{ $index == 3 ? 'md:col-span-7' : '' }}
+            {{ $index > 3 ? 'md:col-span-6' : '' }}">
 
-                        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500 z-10"></div>
+                        {{-- Исправлено inset-02 на inset-0 и добавлено базовое затемнение bg-black/30 для читаемости текста --}}
+                        <div class="absolute inset-0 bg-black/30 transition-colors duration-500 z-10 group-hover:bg-black/20"></div>
 
-                        <img src="/img/categories/{{ $category->slug }}.jpg" alt="{{ $category->display_name }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        @if($category->hasMedia('categories'))
+                            <img src="{{ $category->getFirstMediaUrl('categories') }}" alt="{{ $category->display_name }}"
+                                 class="absolute inset-0 w-full h-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 group-hover:scale-105 transition-all duration-700 ease-out">
+                        @endif
 
                         <div class="absolute inset-0 z-20 p-8 flex flex-col justify-end text-white">
                             <h3 class="text-xl md:text-2xl font-serif tracking-wide mb-2">
@@ -88,7 +123,9 @@
                                 {{ $category->description }}
                             </p>
                             <div>
-                                <a href="{{ url('/services') }}" class="inline-block text-[10px] uppercase tracking-[0.2em] border-b border-white/60 pb-1 hover:border-white transition-all">
+                                {{-- Добавлены классы group-hover:text-pink-500 и group-hover:border-pink-500 --}}
+                                <a href="{{ url('/services') }}"
+                                   class="inline-block text-[10px] p-2 tracking-[0.2em] border-b border-white/60 pb-1 hover:border-pink-400 transition-all duration-300 group-hover:text-pink-500 group-hover:bg-pink-50 group-hover:border-pink-500 rounded-sm">
                                     Подробнее
                                 </a>
                             </div>
@@ -99,26 +136,77 @@
         </section>
     </div>
 
-    <div class="bg-[#fcfaf7] pb-32">
+    <div class="bg-[#fcfaf7] pb-32"
+         x-data="{
+        // Список всех картинок в порядке возрастания с их расширениями
+        images: [
+            '{{ asset('img/studia/1.jpg') }}',
+            '{{ asset('img/studia/2.jpg') }}',
+            '{{ asset('img/studia/3.jpg') }}',
+            '{{ asset('img/studia/4.webp') }}',
+            '{{ asset('img/studia/5.webp') }}',
+            '{{ asset('img/studia/6.webp') }}'
+        ],
+        // Индекс первой видимой картинки
+        startIndex: 0,
+
+        // Количество отображаемых картинок (1 на мобилках, 3 на экранах побольше)
+        get itemsToShow() {
+            return window.innerWidth < 640 ? 1 : 3;
+        },
+
+        next() {
+            // Листаем вперед: если дошли до конца, возвращаемся в начало
+            if (this.startIndex + this.itemsToShow < this.images.length) {
+                this.startIndex++;
+            } else {
+                this.startIndex = 0;
+            }
+        },
+
+        prev() {
+            // Листаем назад: если в самом начале, перепрыгиваем в конец
+            if (this.startIndex > 0) {
+                this.startIndex--;
+            } else {
+                this.startIndex = this.images.length - this.itemsToShow;
+            }
+        }
+     }"
+         @resize.window="startIndex = 0"
+    >
         <section class="max-w-7xl mx-auto px-6">
             <div class="flex justify-between items-end mb-12">
                 <h2 class="text-2xl md:text-3xl font-serif text-gray-900 tracking-wide max-w-xs md:max-w-md">
                     Атмосфера абсолютного комфорта
                 </h2>
                 <div class="flex gap-2">
-                    <button class="w-10 h-10 border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-200">
+                    <button @click="prev()"
+                            class="w-10 h-10 border border-gray-300 flex items-center justify-center text-pink-500  hover:text-pink-500 hover:border-pink-500 rounded-xl transition-all duration-200">
                         &#8592;
                     </button>
-                    <button class="w-10 h-10 border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-200">
+                    <button @click="next()"
+                            class="w-10 h-10 border border-gray-300 flex items-center justify-center text-pink-500  hover:text-pink-500 hover:border-pink-500 rounded-xl transition-all duration-200">
                         &#8594;
                     </button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="aspect-[4/3] bg-gray-200 flex items-center justify-center text-gray-400 text-xs uppercase tracking-widest">[ Интерьер 1 ]</div>
-                <div class="aspect-[4/3] bg-gray-200 flex items-center justify-center text-gray-400 text-xs uppercase tracking-widest">[ Интерьер 2 ]</div>
-                <div class="aspect-[4/3] bg-gray-200 flex items-center justify-center text-gray-400 text-xs uppercase tracking-widest hidden sm:flex">[ Интерьер 3 ]</div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 overflow-hidden">
+
+                <template x-for="(image, index) in images" :key="image">
+                    <div x-show="index >= startIndex && index < (startIndex + itemsToShow)"
+                         x-transition:enter="transition ease-out duration-500"
+                         x-transition:enter-start="opacity-0 transform scale-95 translate-x-4"
+                         x-transition:enter-end="opacity-100 transform scale-100 translate-x-0"
+                         class="aspect-[4/3] bg-gray-200 relative shadow-sm overflow-hidden rounded-lg">
+
+                        <img :src="image"
+                             alt="Интерьер студии Центр Ресниц"
+                             class="w-full h-full object-cover transform scale-100 hover:scale-105 transition-transform duration-700 ease-out">
+                    </div>
+                </template>
+
             </div>
         </section>
     </div>
@@ -130,11 +218,13 @@
             </h2>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
-                @foreach($specialists as $specialist)
-
+                @foreach($specialists->take(4) as $specialist)
                     <div class="text-center group">
                         <div class="aspect-[3/4] bg-gray-300 mb-4 overflow-hidden transition-transform duration-300 group-hover:shadow-md">
-                            <img src="" alt="" class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500">
+                            @if($specialist->hasMedia('specialists'))
+                                <img src="{{ $specialist->getFirstMediaUrl('specialists') }}"
+                                     class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500">
+                            @endif
                         </div>
                         <h4 class="font-semibold text-sm md:text-base text-gray-900">
                             {{ $specialist->user->first_name }} {{ $specialist->user->last_name }}
@@ -147,7 +237,7 @@
             </div>
 
             <div class="mt-12 text-center">
-                <a href="/team" class="inline-block border border-gray-400 text-gray-700 px-8 py-3 rounded-full text-xs uppercase tracking-widest hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-300">
+                <a href="/team" class="inline-block border border-gray-900 text-gray-700 px-8 py-3 rounded-full text-xs uppercase tracking-widest  hover:text-pink-500 hover:border-pink-500 transition-all duration-300">
                     Показать всех
                 </a>
             </div>
@@ -166,21 +256,26 @@
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="aspect-square bg-gray-200 flex items-center justify-center text-gray-400 text-xs uppercase tracking-widest">[ Работа 1 ]</div>
-                <div class="aspect-square bg-gray-200 flex items-center justify-center text-gray-400 text-xs uppercase tracking-widest">[ Работа 2 ]</div>
-                <div class="aspect-square bg-gray-200 flex items-center justify-center text-gray-400 text-xs uppercase tracking-widest">[ Работа 3 ]</div>
-                <div class="aspect-square bg-gray-200 flex items-center justify-center text-gray-400 text-xs uppercase tracking-widest">[ Работа 4 ]</div>
+                @foreach($works->take(4) as $work)
+                    <div class="aspect-square bg-gray-100 relative shadow-sm overflow-hidden rounded-xl group">
+                        @if($work->hasMedia('works'))
+                            <img src="{{ $work->getFirstMediaUrl('works') }}"
+                                 class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                                 alt="{{ $work->service->name ?? 'Пример работы' }}">
+                        @endif
+                    </div>
+                @endforeach
             </div>
         </section>
     </div>
 
-    <div class="bg-[#fcfaf7] pb-24 " >
+    <div class="bg-[#fcfaf7] pb-24">
         <section class="max-w-7xl mx-auto px-6">
-            <div class=" bg-no-repeat bg-cover bg-center text-[#3A0007] py-16 px-8 text-center rounded-[2rem] shadow-sm relative overflow-hidden"
-                 style="background-image: url('{{ asset('img/bg_block.jpg') }}');"> {{-- <- Закрыта кавычка здесь --}}
+            <div class="bg-no-repeat bg-cover bg-center text-[#3A0007] py-16 px-8 text-center rounded-[2rem] shadow-sm relative overflow-hidden"
+                 style="background-image: url('{{ asset('img/bg_block.jpg') }}');">
 
-                <div class="relative z-10 max-w-xl mx-auto ">
-                    <h2 class="text-3xl md:text-4xl font-serif tracking-wide mb-4 ">
+                <div class="relative z-10 max-w-xl mx-auto">
+                    <h2 class="text-3xl md:text-4xl font-serif tracking-wide mb-4">
                         Готовы к преображению?
                     </h2>
                     <p class="text-white/90 text-sm md:text-base font-light tracking-wide mb-8 text-[#3A0007]">

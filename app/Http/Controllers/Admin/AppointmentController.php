@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\LevelService;
 use App\Models\User;
+use App\Notifications\AppointmentNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -30,7 +31,16 @@ class AppointmentController extends Controller
      */
     public function create()
     {
-        return view('admin.appointments.create');
+        // Получаем всех пользователей с ролью 'client', отсортированных по фамилии
+        $users = User::where('role', 'client')->orderBy('last_name')->get();
+
+        // Получаем всех активных специалистов
+        $specialists = \App\Models\Specialist::with('user')->get();
+
+        // Получаем все услуги
+        $services = \App\Models\Service::all();
+
+        return view('admin.appointments.create', compact('users', 'specialists', 'services'));
     }
 
     /**
@@ -38,38 +48,87 @@ class AppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Валидация данных формы админа
-        $request->validate([
-            'phone' => ['required', 'string'], // Номер телефона, который продиктовали
-            'name' => ['required', 'string', 'max:255'],
-            'last_name' => ['nullable', 'string', 'max:255'],
-            'service_id' => ['required', 'exists:services,id'],
-            'specialist_id' => ['required', 'exists:specialists,id'],
-            'appointment_time' => ['required', 'date'],
-        ]);
+        // 1. Динамические правила валидации
+        $rules = [
+            'user_mode'        => ['required', 'in:new,existing'],
+            'service_id'       => ['required', 'exists:services,id'],
+            'specialist_id'    => ['required', 'exists:specialists,id'],
+            'appointment_date' => ['required', 'date'],
+            'appointment_time' => ['required', 'date_format:H:i'], // Изменили с date на date_format
+        ];
 
-        // 2. Магия: Ищем или автоматически создаем пользователя
-        // Поиск идет ТОЛЬКО по телефону
-        $user = User::firstOrCreate(
-            ['phone' => $request->phone], // По какому полю искать
-            [                             // Что записать, если не найден
-                'name' => $request->name,
-                'last_name' => $request->last_name,
-                'email' => null,
-                'password' => null, // Пароля нет, так как он не регистрировался сам
-            ]
-        );
+        // Если создаем НОВОГО клиента — имя и телефон обязательны
+        if ($request->user_mode == 'new') {
+            $rules['name']  = ['required', 'string', 'max:255'];
+            $rules['last_name'] = ['required', 'string', 'max:255'];
+            $rules['phone'] = ['required', 'string'];
+        }
+        // Если выбираем СУЩЕСТВУЮЩЕГО — обязателен user_id
+        else {
+            $rules['user_id'] = ['required', 'exists:users,id'];
+        }
 
-        // 3. Создаем саму запись, привязывая её к ID (найденному или только что созданному)
+        // Теперь запускаем валидацию
+        $validated = $request->validate($rules);
+
+        // 2. Логика определения/создания пользователя
+        if ($request->user_mode == 'new') {
+
+            // Очищаем телефон от лишних символов (пробелы, скобки, тире), оставляем цифры и плюс
+            $cleanPhone = preg_replace('/[^0-9+]/', '', $validated['phone']);
+
+            // Проверяем на всякий случай, вдруг такой телефон уже заведен в системе
+            $existingUser = User::where('phone', $cleanPhone)->first();
+
+            if ($existingUser) {
+                $userId = $existingUser->id;
+            } else {
+                // Создаем нового пользователя. Так как email и password в базе Laravel
+                // обычно non-nullable, генерируем для них технические уникальные данные
+                $newUser = User::create([
+                    'last_name' => $validated['last_name'],
+                    'first_name' => $validated['name'],
+                    'phone' => $cleanPhone,
+                    'role' => 'client', // Задаем роль по умолчанию
+                ]);
+
+                $userId = $newUser->id;
+            }
+        } else {
+            // Если берем готового из списка
+            $userId = $validated['user_id'];
+        }
+
+        // 3. Формируем дату и время (appointment_at) для записи
+        $appointmentAt = Carbon::parse($validated['appointment_date'] . ' ' . $validated['appointment_time']);
+
+        // 4. Расчет стоимости услуги в зависимости от квалификации мастера
+        $specialist = \App\Models\Specialist::find($validated['specialist_id']);
+        $finalPrice = 0;
+
+        // Ищем прайс-лист для связки Уровень Мастера + Услуга
+        $levelService = LevelService::where('level_id', $specialist->level_id)
+            ->where('service_id', $validated['service_id'])
+            ->first();
+
+        if ($levelService) {
+            $finalPrice = $levelService->price;
+        }
+
+        // 5. Сохраняем саму запись в базу данных
         Appointment::create([
-            'user_id' => $user->id, // Теперь у нас ВСЕГДА есть корректный user_id
-            'service_id' => $request->service_id,
-            'specialist_id' => $request->specialist_id,
-            'appointment_time' => $request->appointment_time,
-            'status' => 'confirmed', // Администратор записывает лично, значит статус сразу подтвержден
+            'client_id' => $userId,
+            'specialist_id' => $validated['specialist_id'],
+            'service_id' => $validated['service_id'],
+            'appointment_at' => $appointmentAt,
+            'final_price' => $finalPrice,
+            'status' => 'pending', // Администратор создает лично, значит статус сразу подтвержден
         ]);
 
-        return redirect()->back()->with('success', 'Клиент успешно записан!');
+        return redirect()->route('admin.appointments.index')
+            ->with('success', $request->has('is_new_client')
+                ? 'Новый клиент успешно добавлен в базу и записан на процедуру!'
+                : 'Запись успешно создана.');
     }
 
     /**
@@ -86,7 +145,7 @@ class AppointmentController extends Controller
     public function edit(Appointment $appointment)
     {
         $specialists = \App\Models\Specialist::with('user')->get()
-            ->sortBy(fn ($s) => $s->user->last_name ?? '')
+            ->sortBy(fn($s) => $s->user->last_name ?? '')
             ->values();
 
 
@@ -99,13 +158,13 @@ class AppointmentController extends Controller
     public function update(Request $request, Appointment $appointment)
     {
         $validated = $request->validate([
-            'specialist_id'    => ['required', 'exists:specialists,id'],
+            'specialist_id' => ['required', 'exists:specialists,id'],
             'appointment_date' => ['required', 'date_format:Y-m-d'], // Отдельное поле даты в форме
             'appointment_time' => ['required', 'date_format:H:i'],   // Отдельное поле времени в форме
-            'status'           => ['required', 'in:pending,confirmed,cancelled'],
+            'status' => ['required', 'in:pending,approved,confirmed,cancelled'],
         ], [
             'specialist_id.exists' => 'Выбранный специалист не найден в системе.',
-            'status.in'            => 'Указан некорректный статус записи.',
+            'status.in' => 'Указан некорректный статус записи.',
         ]);
 
         // 2. Собираем дату и время в один объект Carbon для базы данных
@@ -127,10 +186,13 @@ class AppointmentController extends Controller
 
         // 4. Обновляем параметры записи
         $appointment->update([
-            'specialist_id'  => $validated['specialist_id'],
+            'specialist_id' => $validated['specialist_id'],
             'appointment_at' => $appointmentAt,
-            'status'         => $validated['status'],
+            'status' => $validated['status'],
         ]);
+
+        $client = $appointment->user;
+        $client->notify(new AppointmentNotification($appointment, 'confirmed'));
 
         return redirect()->route('admin.appointments.index')
             ->with('success', 'Запись успешно изменена.');
@@ -141,6 +203,7 @@ class AppointmentController extends Controller
      */
     public function destroy(Appointment $appointment)
     {
-
+        $appointment->delete();
+        return redirect()->route('admin.appointments.index');
     }
 }

@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('service_id')->constrained('services')->onDelete('cascade');
             $table->foreignId('specialist_id')->nullable()->constrained('specialists')->onDelete('cascade');
             $table->string('title');
-            $table->enum('type', ['discount', 'model'])->default('discount');
             $table->unsignedTinyInteger('discount_percent')->default(0);
             $table->date('start_date');
             $table->date('end_date');
