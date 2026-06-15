@@ -1,35 +1,28 @@
 <x-app-layout title="Центр Ресниц | Специалисты">
-
-    {{-- Применяем шрифты Playfair Display и Manrope --}}
     <style>
-        /* Все заголовки и элементы с классом font-serif получают Playfair Display */
         h1, h2, h3, h4, h5, h6,
         .font-serif,
         [class*="font-serif"] {
             font-family: 'Playfair Display', serif !important;
         }
 
-        /* Основной текст — Manrope */
         body, p, span, button, a, li, div,
         .text-gray-600, .text-gray-500, .text-gray-400,
-        .tracking-widest, .uppercase,
+        .tracking-widest,
         input, textarea, select {
             font-family: 'Manrope', sans-serif;
         }
 
-        /* Для кнопок и ссылок сохраняем Manrope */
         button, a, .btn {
             font-family: 'Manrope', sans-serif;
         }
     </style>
 
-    {{-- 1. ШАПКА СТРАНИЦЫ (ПОЛНОШИРИННАЯ С ФОНОМ) --}}
     <div class="w-full bg-cover bg-center pt-16 pb-16 relative" style="background-image: url('{{ asset('img/bg_main.png') }}');">
-        {{-- Градиентное наложение для размытия нижнего края в цвет фона --}}
         <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-gray-100 to-transparent pointer-events-none"></div>
 
         <div class="max-w-7xl mx-auto px-6 text-center">
-            <h2 class="text-3xl lg:text-4xl font-normal text-[#1e1f22] tracking-widest uppercase mb-4 font-serif">
+            <h2 class="text-3xl lg:text-4xl font-normal text-[#1e1f22] tracking-widest mb-4 font-serif">
                 Наши специалисты
             </h2>
             <div class="w-24 h-0.5 bg-[#ff5c8a] mx-auto mb-4 rounded-full"></div>
@@ -39,22 +32,15 @@
         </div>
     </div>
 
-    {{-- ================================================================== --}}
-    {{-- ОСНОВНОЙ КОНТЕЙНЕР ДЛЯ СПИСКА МАСТЕРОВ (ЗАЖАТ ПО ЦЕНТРУ)           --}}
-    {{-- ================================================================== --}}
     <section class="max-w-7xl mx-auto pt-12 pb-24 px-6">
-
-        {{-- Группируем мастеров по имени уровня --}}
         @foreach($team->groupBy('level.name') as $levelName => $members)
-
             <div class="mb-20">
-                {{-- Заголовок и краткое описание отличий уровня мастера --}}
                 <div class="mb-8 border-l-4 border-[#ff5c8a] pl-4 space-y-1">
-                    <h3 class="text-2xl text-[#1e1f22] tracking-wide font-normal uppercase font-serif">
+                    <h3 class="text-2xl text-[#1e1f22] tracking-wide font-normal font-serif">
                         @switch(mb_strtolower($levelName))
-                            @case('lead') ведущий специалист @break
-                            @case('top') топ-мастер @break
-                            @case('master') мастер @break
+                            @case('lead') Ведущий специалист @break
+                            @case('top') Топ-мастер @break
+                            @case('master') Мастер @break
                             @default {{ $levelName }}
                         @endswitch
                     </h3>
@@ -76,13 +62,11 @@
                     </p>
                 </div>
 
-                {{-- Сетка для карточек этой категории --}}
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     @foreach($members as $member)
-                        {{-- Карточка мастера (добавлен класс group для изоляции ховер-эффекта) --}}
+
                         <div class="group p-6 bg-white rounded-3xl border border-[#f1f1f5] flex flex-col sm:flex-row gap-6 items-center sm:items-start hover:shadow-xl hover:shadow-pink-200 transition-all duration-300">
 
-                            {{-- Фото мастера слева --}}
                             <div class="relative w-44 h-44 flex-shrink-0 bg-[#f8f8fa] rounded-2xl overflow-hidden">
                                 @if($member->hasMedia('specialists'))
                                     <img src="{{ $member->getFirstMediaUrl('specialists') }}"
@@ -90,23 +74,22 @@
                                 @endif
 
                                 @if($member->specialization && mb_strtolower($member->specialization) === 'Руководитель')
-                                    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-[#bd0055] text-white text-[9px] tracking-widest uppercase px-3 py-1 rounded-full font-medium whitespace-nowrap">
+                                    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-[#bd0055] text-white text-[9px] tracking-widest  px-3 py-1 rounded-full font-medium whitespace-nowrap">
                                         Руководитель
                                     </div>
                                 @endif
                             </div>
 
-                            {{-- Информация справа (растягивается на всю доступную ширину) --}}
                             <div class="flex flex-col flex-grow text-center sm:text-left h-full justify-between">
                                 <div>
-                    <span class="text-[10px] font-normal uppercase tracking-widest text-pink-500 block mb-1">
-                        @switch(mb_strtolower($levelName))
-                            @case('lead') ведущий специалист @break
-                            @case('top') топ-мастер @break
-                            @case('master') мастер @break
-                            @default {{ mb_strtolower($member->specialization ?? $levelName) }}
-                        @endswitch
-                    </span>
+                                    <span class="text-sm font-normal tracking-widest text-pink-500 block mb-1">
+                                        @switch(mb_strtolower($levelName))
+                                            @case('lead') Ведущий специалист @break
+                                            @case('top') Топ-мастер @break
+                                            @case('master') Мастер @break
+                                            @default {{ mb_strtolower($member->specialization ?? $levelName) }}
+                                        @endswitch
+                                    </span>
                                     <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-3 justify-center sm:justify-start">
                                         <h4 class="text-2xl font-normal text-[#1e1f22] group-hover:text-pink-500 transition-colors duration-300 font-serif">
                                             {{ $member->user->first_name }} {{ $member->user->last_name }}
@@ -129,8 +112,8 @@
 
                                 <div class="pt-2 flex justify-end">
                                     <button x-data @click="$store.modalManager.openBooking({ specialist_id: {{ $member->id }} })"
-                                            class="opacity-0 group-hover:opacity-100 inline-block bg-pink-500 text-white rounded-xl py-3 px-6 text-xs tracking-wider uppercase font-normal transition-all duration-300 transform translate-x-4 group-hover:translate-x-0 hover:cursor-pointer w-full sm:w-auto text-center shadow-sm">
-                                        записаться к мастеру
+                                            class="opacity-0 group-hover:opacity-100 inline-block bg-pink-500 text-white rounded-xl py-3 px-6 text-xs tracking-wider font-normal transition-all duration-300 transform translate-x-4 group-hover:translate-x-0 hover:cursor-pointer w-full sm:w-auto text-center shadow-sm">
+                                        Подробнее
                                     </button>
                                 </div>
                             </div>

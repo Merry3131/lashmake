@@ -5,18 +5,18 @@
 @section('content')
     <div class="w-full font-['Manrope'] text-[#1e1f22]">
 
-        {{-- ВЕРХНЯЯ ЧАСТЬ: ЗАГОЛОВОК И НАЗАД --}}
+
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-gray-100">
             <div>
-                <h1 class="text-2xl font-normal tracking-wider uppercase text-[#1e1f22] font-[Playfair_Display]">Новая услуга</h1>
-                <p class="text-xs text-[#7c7e8c] font-light mt-1">Добавление новой процедуры в прайс-лист студии красоты</p>
+                <h1 class="text-2xl font-normal   text-[#1e1f22] font-[Playfair_Display]">Новая услуга</h1>
+                <p class="text-sm text-[#7c7e8c] font-light mt-1">Добавление новой процедуры в прайс-лист студии красоты</p>
             </div>
-            <a href="{{ route('admin.services.index') }}" class="text-xs uppercase tracking-wider text-[#7c7e8c] hover:text-[#ff5c8a] transition-colors duration-200 font-medium">
+            <a href="{{ route('admin.services.index') }}" class="text-xs   text-[#7c7e8c] hover:text-[#ff5c8a] transition-colors duration-200 font-medium">
                 ← Назад к списку
             </a>
         </div>
 
-        {{-- ФОРМА СОЗДАНИЯ (ПОЛНАЯ ШИРИНА И ОДИН СТОЛБЕЦ) --}}
+
         <main class="w-full">
             <div class="w-full bg-white p-6 md:p-8 rounded-3xl border border-[#f1f1f5] shadow-sm text-left">
 
@@ -25,9 +25,9 @@
 
                     <div class="flex flex-col gap-6 w-full">
 
-                        {{-- 1. Название услуги --}}
+
                         <div class="w-full">
-                            <label for="name" class="block text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">
+                            <label for="name" class="block text-sm   text-[#7c7e8c] font-medium mb-1.5">
                                 Название услуги
                             </label>
                             <input type="text"
@@ -38,13 +38,13 @@
                                    placeholder="Например: Классическое наращивание ресниц"
                                    class="block w-full rounded-xl border border-[#f1f1f5] bg-[#f8f8fa] focus:border-[#ff5c8a] focus:ring-[#ff5c8a]/20 text-sm p-3 transition-colors duration-200 outline-none font-light" />
                             @error('name')
-                            <p class="text-xs text-rose-500 font-light mt-1">⚠️ {{ $message }}</p>
+                            <p class="text-xs text-rose-500 font-light mt-1"> {{ $message }}</p>
                             @enderror
                         </div>
 
-                        {{-- 2. Категория услуги --}}
+
                         <div class="w-full">
-                            <label for="category_id" class="block text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">
+                            <label for="category_id" class="block text-sm   text-[#7c7e8c] font-medium mb-1.5">
                                 Категория процедуры
                             </label>
                             <select name="category_id"
@@ -59,13 +59,13 @@
                                 @endforeach
                             </select>
                             @error('category_id')
-                            <p class="text-xs text-rose-500 font-light mt-1">⚠️ {{ $message }}</p>
+                            <p class="text-xs text-rose-500 font-light mt-1"> {{ $message }}</p>
                             @enderror
                         </div>
 
-                        {{-- 3. Доступность (Активность) --}}
+
                         <div class="w-full">
-                            <span class="block text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium mb-2.5">
+                            <span class="block text-sm   text-[#7c7e8c] font-medium mb-2.5">
                                 Доступность для онлайн-записи
                             </span>
                             <div class="flex flex-col sm:flex-row gap-4 sm:items-center h-auto sm:h-11">
@@ -76,7 +76,7 @@
                                            {{ old('active', '1') == '1' ? 'checked' : '' }}
                                            class="w-4 h-4 text-[#ff5c8a] border-gray-300 focus:ring-[#ff5c8a]/20" />
                                     <span class="ml-2 text-sm text-[#1e1f22] font-light flex items-center">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+
                                         Активна и видна
                                     </span>
                                 </label>
@@ -87,19 +87,19 @@
                                            {{ old('active') == '0' ? 'checked' : '' }}
                                            class="w-4 h-4 text-[#ff5c8a] border-gray-300 focus:ring-[#ff5c8a]/20" />
                                     <span class="ml-2 text-sm text-[#1e1f22] font-light flex items-center">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5"></span>
+
                                         Скрыта / Недоступна
                                     </span>
                                 </label>
                             </div>
                             @error('active')
-                            <p class="text-xs text-rose-500 font-light mt-1">⚠️ {{ $message }}</p>
+                            <p class="text-xs text-rose-500 font-light mt-1"> {{ $message }}</p>
                             @enderror
                         </div>
 
-                        {{-- 4. Описание услуги --}}
+
                         <div class="w-full">
-                            <label for="description" class="block text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">
+                            <label for="description" class="block text-sm   text-[#7c7e8c] font-medium mb-1.5">
                                 Подробное описание услуги для клиентов
                             </label>
                             <textarea id="description"
@@ -108,20 +108,20 @@
                                       placeholder="Опишите особенности выполнения процедуры, используемые материалы, эффект и рекомендации..."
                                       class="block w-full rounded-xl border border-[#f1f1f5] bg-[#f8f8fa] focus:border-[#ff5c8a] focus:bg-white focus:ring-[#ff5c8a]/20 text-sm p-3 transition-all duration-200 outline-none font-light resize-y">{{ old('description') }}</textarea>
                             @error('description')
-                            <p class="text-xs text-rose-500 font-light mt-1">⚠️ {{ $message }}</p>
+                            <p class="text-xs text-rose-500 font-light mt-1"> {{ $message }}</p>
                             @enderror
                         </div>
 
                     </div>
 
-                    {{-- КНОПКИ ДЕЙСТВИЙ --}}
+
                     <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-50 w-full">
                         <a href="{{ route('admin.services.index') }}"
-                           class="w-full sm:w-auto sm:px-8 py-3.5 border border-gray-200 text-gray-500 hover:text-[#1e1f22] hover:bg-gray-50 text-xs tracking-wider uppercase font-normal rounded-xl transition-all duration-200 text-center">
+                           class="w-full sm:w-auto sm:px-8 py-3.5 border border-gray-200 text-gray-500 hover:text-[#1e1f22] hover:bg-gray-50 text-xs   font-normal rounded-xl transition-all duration-200 text-center">
                             Отмена
                         </a>
                         <button type="submit"
-                                class="w-full sm:w-auto sm:px-8 py-3.5 bg-[#ff5c8a] hover:bg-[#e04b75] text-white text-xs tracking-wider uppercase font-normal rounded-xl transition-all duration-300 shadow-sm cursor-pointer">
+                                class="w-full sm:w-auto sm:px-8 py-3.5 bg-[#ff5c8a] hover:bg-[#e04b75] text-white text-xs   font-normal rounded-xl transition-all duration-300 shadow-sm cursor-pointer">
                             Сохранить услугу
                         </button>
                     </div>

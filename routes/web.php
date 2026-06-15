@@ -78,6 +78,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('works', \App\Http\Controllers\Admin\ExampleOfWorkController::class);
     // график работы
     Route::resource('/schedule', \App\Http\Controllers\Admin\WorkScheduleController::class);
+    Route::get('/services/print', [App\Http\Controllers\Admin\ServiceController::class, 'print'])->name('services.print');
 
 });
 

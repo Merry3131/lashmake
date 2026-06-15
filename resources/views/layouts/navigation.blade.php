@@ -18,7 +18,7 @@
                         Услуги
                     </x-nav-link>
                     <x-nav-link :href="url('/team')" :active="request()->is('team*')">
-                        Специалисты`
+                        Специалисты
                     </x-nav-link>
                     <x-nav-link :href="url('/reviews')" :active="request()->is('reviews*')">
                         Отзывы

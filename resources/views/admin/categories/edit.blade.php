@@ -6,18 +6,18 @@
 
     <div class="w-full font-['Manrope'] text-[#1e1f22]">
 
-        {{-- ВЕРХНЯЯ ЧАСТЬ: ЗАГОЛОВОК И ССЫЛКА НАЗАД --}}
+
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-gray-100">
             <div>
-                <h1 class="text-2xl font-normal tracking-wider uppercase text-[#1e1f22] font-[Playfair_Display]">Редактировать категорию</h1>
+                <h1 class="text-2xl  text-[#1e1f22] font-[Playfair_Display]">Редактировать категорию</h1>
                 <p class="text-xs text-[#7c7e8c] font-light mt-1">Изменение параметров существующего раздела услуг</p>
             </div>
-            <a href="{{ route('admin.categories.index') }}" class="text-xs uppercase tracking-wider text-[#7c7e8c] hover:text-[#ff5c8a] transition-colors duration-200 font-medium">
+            <a href="{{ route('admin.categories.index') }}" class="text-xs  text-[#7c7e8c] hover:text-[#ff5c8a] transition-colors duration-200 font-medium">
                 ← Назад к списку
             </a>
         </div>
 
-        {{-- ПОЛНОШИРИННАЯ ФОРМА В КАРТОЧНОМ СТИЛЕ --}}
+
         <main class="w-full overflow-y-auto">
             <div class="w-full bg-white p-6 md:p-8 rounded-3xl border border-[#f1f1f5] shadow-sm hover:shadow-sm transition-all duration-300 text-left">
 
@@ -25,12 +25,12 @@
                     @csrf
                     @method('PUT')
 
-                    {{-- Сетка для полей ввода --}}
+
                     <div class="grid grid-cols-1 gap-6">
 
-                        {{-- Поле: Название категории --}}
+
                         <div>
-                            <label for="display_name" class="block text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">
+                            <label for="display_name" class="block text-sm  text-[#7c7e8c] font-medium mb-1.5">
                                 Название категории (отображаемое на сайте)
                             </label>
                             <input type="text"
@@ -42,13 +42,13 @@
                                    placeholder="Например: Наращивание ресниц" />
 
                             @error('display_name')
-                            <p class="text-xs text-rose-500 font-light mt-1">⚠️ {{ $message }}</p>
+                            <p class="text-xs text-rose-500 font-light mt-1">text-sm {{ $message }}</p>
                             @enderror
                         </div>
 
-                        {{-- Поле: Описание категории --}}
+
                         <div>
-                            <label for="description" class="block text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">
+                            <label for="description" class="block text-sm  text-[#7c7e8c] font-medium mb-1.5">
                                 Описание категории
                             </label>
                             <textarea id="description"
@@ -58,19 +58,19 @@
                                       placeholder="Опишите категорию услуг для клиентов...">{{ old('description', $category->description) }}</textarea>
 
                             @error('description')
-                            <p class="text-xs text-rose-500 font-light mt-1">⚠️ {{ $message }}</p>
+                            <p class="text-xs text-rose-500 font-light mt-1">text-sm {{ $message }}</p>
                             @enderror
                         </div>
 
                     </div>
 
-                    {{-- Блок кнопок действий, прижатый к правому краю --}}
+
                     <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-50">
-                        <a href="{{ route('admin.categories.index') }}" class="w-full sm:w-auto sm:px-8 py-3.5 border border-gray-200 text-gray-500 hover:text-[#1e1f22] hover:bg-gray-50 text-xs tracking-wider uppercase font-normal rounded-xl transition-all duration-200 text-center">
+                        <a href="{{ route('admin.categories.index') }}" class="w-full sm:w-auto sm:px-8 py-3.5 border border-gray-200 text-gray-500 hover:text-[#1e1f22] hover:bg-gray-50 text-xs  font-normal rounded-xl transition-all duration-200 text-center">
                             Отмена
                         </a>
 
-                        <button type="submit" class="w-full sm:w-auto sm:px-8 py-3.5 bg-[#ff5c8a] hover:bg-[#e04b75] text-white text-xs tracking-wider uppercase font-normal rounded-xl transition-all duration-300 shadow-sm cursor-pointer">
+                        <button type="submit" class="w-full sm:w-auto sm:px-8 py-3.5 bg-[#ff5c8a] hover:bg-[#e04b75] text-white text-xs  font-normal rounded-xl transition-all duration-300 shadow-sm cursor-pointer">
                             Обновить категорию
                         </button>
                     </div>

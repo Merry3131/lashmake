@@ -1,4 +1,22 @@
 <section class="space-y-6">
+    <style>
+        h1, h2, h3, h4, h5, h6,
+        .font-serif,
+        [class*="font-serif"] {
+            font-family: 'Playfair Display', serif !important;
+        }
+
+        body, p, span, button, a, li, div,
+        .text-gray-600, .text-gray-500, .text-gray-400,
+        .tracking-widest, .,
+        input, textarea, select {
+            font-family: 'Manrope', sans-serif;
+        }
+
+        button, a, .btn {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
             {{ __('Удалить аккаунт') }}

@@ -19,3 +19,8 @@ Route::post('/appointments', [WorkScheduleController::class, 'store']);
 Route::get('/level-service-info', [BookingController::class, 'getLevelServiceInfo']);
 
 Route::get('/specialist/{id}', [BookingController::class, 'getSpecialist']);
+
+Route::get('/specialist/{specialist}/services', function ($specialistId) {
+    $specialist = \App\Models\Specialist::with('service_specialist')->findOrFail($specialistId);
+    return response()->json($specialist->service_specialist);
+});

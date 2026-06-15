@@ -201,7 +201,7 @@
                                 })"
                                     class="w-full text-left p-3 rounded-xl border-2 border-pink-200 bg-pink-50 hover:bg-pink-100 transition-all">
                                 <div class="text-gray-800 font-[Manrope]">{{ $promotion->title }}</div>
-                                <div class="flex justify-between items-center text-xs text-gray-500 font-[Manrope]">
+                                <div class="flex justify-between items-center text-sm text-gray-500 font-[Manrope]">
                                     <span>{{ $promotion->service->name ?? '' }}</span>
                                     <span class="bg-pink-500 text-white px-2 py-0.5 rounded-full">-{{ $promotion->discount_percent }}%</span>
                                 </div>
@@ -210,7 +210,7 @@
 
                         @foreach($categories as $category)
                             @if($category->services->isNotEmpty())
-                                <h2 class="text-sm uppercase text-gray-400 mt-4 font-[Manrope]">{{ $category->display_name }}</h2>
+                                <h2 class="text-sm  text-gray-400 mt-4 font-[Manrope]">{{ $category->display_name }}</h2>
 
                                 @foreach($category->services as $service)
                                     <button @click="
@@ -231,8 +231,8 @@
 
                                         <div class="space-y-1.5 mt-2 bg-white/50 p-2 rounded-lg">
                                             @foreach($service->levels as $level)
-                                                <div class="flex justify-between items-center text-xs font-[Manrope]">
-                                                    <span class="text-gray-500 uppercase">{{ $level->name }}</span>
+                                                <div class="flex justify-between items-center text-sm font-[Manrope]">
+                                                    <span class="text-gray-500 ">{{ $level->display_name }}</span>
                                                     <div class="flex items-center gap-3">
                                                         <span class="text-gray-400 flex items-center">
                                                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -275,7 +275,7 @@
                             <button @click="
                                     selectedSpecialist = {{ $specialist->id }};
                                     specialistName = '{{ $specialist->user->first_name }} {{ $specialist->user->last_name }}';
-                                    specialistLevel = '{{ $specialist->level->name }}';
+                                    specialistLevel = '{{ $specialist->level->display_name }}';
                                     specialistBio = '{{ $specialist->bio }}';
 
                                     specialistServices = @js($specialist->service_specialist()->with(['category', 'levels'])->get()->each(function($service) use ($specialist) {
@@ -293,8 +293,8 @@
 
                                 <div>
                                     <div class="font-normal text-gray-800 font-[Manrope]">{{ $specialist->user->first_name }} {{ $specialist->user->last_name }}</div>
-                                    <div class="text-xs text-pink-500 font-[Manrope]">{{ $specialist->level_name }}</div>
-                                    <div class="text-xs text-gray-500 font-[Manrope]">{{ Str::limit($specialist->bio, 60) }}</div>
+                                    <div class="text-sm text-pink-500 font-[Manrope]">{{ $specialist->level->display_name }}</div>
+                                    <div class="text-sm text-gray-500 font-[Manrope]">{{ Str::limit($specialist->bio, 60) }}</div>
                                 </div>
                             </button>
                         @empty
@@ -326,7 +326,7 @@
                     <div class="max-h-96 overflow-y-auto pr-2 custom-scrollbar space-y-4">
                         <template x-for="(services, categoryName) in specialistServices" :key="categoryName">
                             <div class="mb-6">
-                                <h2 x-text="categoryName" class="text-xs uppercase tracking-wider text-gray-400 mb-3 ml-1 font-[Manrope]"></h2>
+                                <h2 x-text="categoryName" class="text-sm   text-gray-400 mb-3 ml-1 font-[Manrope]"></h2>
                                 <div class="space-y-2.5">
                                     <template x-for="service in services" :key="service.id">
                                         <button @click="
@@ -343,7 +343,7 @@
                                                 <div class="text-sm text-pink-600 bg-pink-50/80 px-2.5 py-1 rounded-lg font-[Manrope]"
                                                      x-text="(service.levels?.[0]?.pivot?.price ? Math.round(service.levels[0].pivot.price) : Math.round(service.base_price)) + ' ₽'">
                                                 </div>
-                                                <div class="text-xs text-gray-400 flex items-center gap-1.5 font-[Manrope]">
+                                                <div class="text-sm text-gray-400 flex items-center gap-1.5 font-[Manrope]">
                                                     <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                     </svg>
@@ -361,7 +361,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                                 </svg>
                                 <p class="text-gray-500 text-sm font-[Manrope]">У этого мастера пока нет назначенных услуг</p>
-                                <p class="text-xs text-gray-400 mt-1 font-[Manrope]">Пожалуйста, выберите другого специалиста.</p>
+                                <p class="text-sm text-gray-400 mt-1 font-[Manrope]">Пожалуйста, выберите другого специалиста.</p>
                             </div>
                         </template>
                     </div>
@@ -379,13 +379,13 @@
                      style="top: 80px;">
                     <div class="relative flex items-center justify-center mb-4">
                         <button @click="step = 'services'" class="absolute left-0 text-pink-500 hover:underline text-sm font-[Manrope]">Назад</button>
-                        <h1 class="text-xl text-gray-800 font-[Playfair_Display] font-normal">Выберите мастера</h1>
+                        <h1 class="text-xl text-gray-800 font-[Playfair_Display]">Выберите мастера</h1>
                     </div>
 
                     <div class="max-h-96 overflow-y-auto pr-2 custom-scrollbar">
                         <template x-for="(specialists, levelName) in serviceSpecialists" :key="levelName">
                             <div class="mb-6">
-                                <h2 x-text="levelName" class="text-xs uppercase text-pink-500 mb-3 ml-1 font-[Manrope]"></h2>
+                                <h2 x-text="levelName === 'lead' ? 'Ведущий специалист' : (levelName === 'top' ? 'Топ-мастер' : (levelName === 'master' ? 'Мастер' : levelName))" class="text-sm text-pink-500 mb-3 ml-1 font-[Manrope]"></h2>
                                 <div class="space-y-2">
                                     <template x-for="specialist in specialists" :key="specialist.id">
                                         <button @click="
@@ -401,7 +401,7 @@
                                             <div class="flex-1">
                                                 <div class="font-normal text-gray-700 font-[Manrope]"
                                                      x-text="specialist.user.first_name + ' ' + (specialist.user.last_name || '')"></div>
-                                                <div class="text-[10px] text-gray-400 font-[Manrope]" x-text="specialist.bio"></div>
+                                                <div class="text-sm text-gray-400 font-[Manrope]" x-text="specialist.bio"></div>
                                             </div>
                                         </button>
                                     </template>
@@ -435,16 +435,16 @@
                         </div>
 
                         <div class="space-y-2">
-                            <label class="text-xs uppercase tracking-wider text-gray-400 px-1 font-[Manrope]">Доступные даты</label>
+                            <label class="text-sm   text-gray-400 px-1 font-[Manrope]">Доступные даты</label>
                             <div class="flex gap-2.5 overflow-x-auto py-2 px-1 custom-scrollbar">
                                 @for($i = 0; $i < 30; $i++)
                                     @php $date = \Carbon\Carbon::today()->addDays($i); @endphp
                                     <button @click="selectedDate = '{{ $date->format('Y-m-d') }}'; loadSlots();"
                                             :class="selectedDate === '{{ $date->format('Y-m-d') }}' ? 'bg-pink-500 text-white shadow-lg shadow-pink-200 border-pink-500' : 'bg-pink-50/60 text-pink-600 border-pink-100 hover:bg-pink-100/70'"
                                             class="flex-shrink-0 w-16 py-3 rounded-2xl text-center transition-all duration-200 border font-[Manrope]">
-                                        <div class="text-[10px] uppercase tracking-wider opacity-80">{{ $date->translatedFormat('D') }}</div>
+                                        <div class="text-sm   opacity-80">{{ $date->translatedFormat('D') }}</div>
                                         <div class="text-2xl my-0.5 font-normal">{{ $date->format('d') }}</div>
-                                        <div class="text-[9px] uppercase tracking-widest opacity-90">{{ $date->translatedFormat('M') }}</div>
+                                        <div class="text-sm  tracking-widest opacity-90">{{ $date->translatedFormat('M') }}</div>
                                     </button>
                                 @endfor
                             </div>
@@ -457,11 +457,11 @@
                                         <span x-text="specialistName ? specialistName[0] : 'M'"></span>
                                     </div>
                                     <div class="min-w-0">
-                                        <div class="text-[10px] uppercase tracking-wider text-gray-400 mb-0.5 font-[Manrope]">Выбранный мастер</div>
+                                        <div class="text-sm   text-gray-400 mb-0.5 font-[Manrope]">Выбранный мастер</div>
                                         <h3 class="text-gray-800 text-sm font-[Manrope]" x-text="specialistName"></h3>
                                     </div>
                                 </div>
-                                <span class="bg-pink-100 text-pink-600 text-[9px] px-2 py-1 rounded uppercase tracking-wider flex-shrink-0 font-[Manrope]" x-text="specialistLevel"></span>
+                                <span class="bg-pink-100 text-pink-600 text-sm px-2 py-1 rounded   flex-shrink-0 font-[Manrope]" x-text="specialistLevel === 'lead' ? 'Ведущий специалист' : (specialistLevel === 'top' ? 'Топ-мастер' : (specialistLevel === 'master' ? 'Мастер' : specialistLevel))"></span>
                             </div>
 
                             <div class="bg-gray-50/60 rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center justify-between gap-4">
@@ -472,13 +472,13 @@
                                         </svg>
                                     </div>
                                     <div class="min-w-0">
-                                        <div class="text-[10px] uppercase tracking-wider text-gray-400 mb-0.5 font-[Manrope]">Выбранная услуга</div>
+                                        <div class="text-sm   text-gray-400 mb-0.5 font-[Manrope]">Выбранная услуга</div>
                                         <h3 class="text-gray-800 text-sm font-[Manrope]" x-text="serviceName"></h3>
                                     </div>
                                 </div>
                                 <div class="text-right flex-shrink-0">
                                     <div class="text-sm text-pink-600 font-[Manrope]" x-text="servicePrice"></div>
-                                    <div class="text-[10px] text-gray-400 flex items-center justify-end gap-1 mt-0.5 font-[Manrope]">
+                                    <div class="text-sm text-gray-400 flex items-center justify-end gap-1 mt-0.5 font-[Manrope]">
                                         <svg class="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
@@ -489,7 +489,7 @@
                         </div>
 
                         <div class="space-y-2 font-[Manrope] m-4">
-                            <label class="text-xs uppercase tracking-wider text-gray-400 px-1 block">Доступные слоты</label>
+                            <label class="text-sm   text-gray-400 px-1 block">Доступные слоты</label>
 
                             <template x-if="loading">
                                 <div class="flex justify-center py-12">
@@ -514,7 +514,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                     </svg>
                                     <p class="text-gray-500 text-sm font-[Manrope]">На выбранную дату свободных мест нет</p>
-                                    <p class="text-xs text-gray-400 mt-1 font-[Manrope]">Пожалуйста, попробуйте выбрать другой день на календаре выше.</p>
+                                    <p class="text-sm text-gray-400 mt-1 font-[Manrope]">Пожалуйста, попробуйте выбрать другой день на календаре выше.</p>
                                 </div>
                             </template>
                         </div>
@@ -544,9 +544,9 @@
                                 </svg>
                             </div>
                             <div>
-                                <div class="text-xs text-gray-400 uppercase font-[Manrope]">Услуга</div>
+                                <div class="text-sm text-gray-400  font-[Manrope]">Услуга</div>
                                 <div class="text-gray-800 text-base font-[Manrope]" x-text="serviceName"></div>
-                                <div class="text-xs text-gray-500 font-[Manrope]" x-text="'Длительность: ' + serviceDuration"></div>
+                                <div class="text-sm text-gray-500 font-[Manrope]" x-text="'Длительность: ' + serviceDuration"></div>
                             </div>
                         </div>
 
@@ -559,7 +559,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <div class="text-xs text-gray-400 uppercase font-[Manrope]">Мастер</div>
+                                <div class="text-sm text-gray-400  font-[Manrope]">Мастер</div>
                                 <div class="text-gray-800 text-base font-[Manrope]" x-text="specialistName"></div>
                             </div>
                         </div>
@@ -573,7 +573,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <div class="text-xs text-gray-400 uppercase font-[Manrope]">Дата и время</div>
+                                <div class="text-sm text-gray-400  font-[Manrope]">Дата и время</div>
                                 <div class="text-gray-800 text-base font-[Manrope]">
                                     <span x-text="new Date(selectedDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })"></span>
                                     в <span x-text="selectedTime"></span>

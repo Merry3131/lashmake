@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Level;
+use App\Models\Service;
 use App\Models\Specialist;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -42,15 +43,16 @@ class SpecialistController extends Controller
         return view('admin.specialists.select_user', compact('users'));
     }
 
-    public function build (User $user)
+    public function build(User $user)
     {
         if (Specialist::where('user_id', $user->id)->exists()) {
             return redirect()->route('admin.specialists.create')->with('error', 'Этот пользователь уже стал специалистом.');
         }
 
         $levels = Level::all();
+        $services = Service::all();
 
-        return view('admin.specialists.create', compact('user', 'levels'));
+        return view('admin.specialists.create', compact('user', 'levels', 'services'));
     }
 
     /**
@@ -59,20 +61,30 @@ class SpecialistController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-
             'user_id' => 'required|exists:users,id|unique:specialists,user_id',
-            'level' => 'nullable|string|max:255',
+            'level_id' => 'required|exists:levels,id',
             'experience' => 'nullable|string|max:255',
             'bio' => 'nullable|string',
+            'services' => 'nullable|array',
+            'services.*' => 'exists:services,id',
         ], [
             'user_id.required' => 'Выберите пользователя, который станет специалистом.',
             'user_id.exists' => 'Выбранный пользователь не найден в системе.',
             'user_id.unique' => 'Этот пользователь уже является специалистом салона.',
+            'level_id.required' => 'Выберите уровень квалификации мастера.',
+        ]);
+
+        $specialist = Specialist::create([
+            'user_id' => $validated['user_id'],
+            'level_id' => $validated['level_id'],
+            'experience' => $validated['experience'] ?? null,
+            'bio' => $validated['bio'] ?? null,
         ]);
 
 
-        Specialist::create($validated);
-
+        if (!empty($validated['services'])) {
+            $specialist->service_specialist()->sync($validated['services']);
+        }
 
         return redirect()->route('admin.specialists.index')
             ->with('success', 'Специалист успешно добавлен.');
@@ -92,7 +104,10 @@ class SpecialistController extends Controller
     public function edit(Specialist $specialist)
     {
         $levels = Level::select('id', 'name')->get();
-        return view('admin.specialists.edit', compact('specialist', 'levels'));
+        $services = Service::all();
+        $assignedServices = $specialist->service_specialist()->pluck('services.id')->toArray();
+
+        return view('admin.specialists.edit', compact('specialist', 'levels', 'services', 'assignedServices'));
     }
 
     /**
@@ -104,6 +119,8 @@ class SpecialistController extends Controller
             'level_id' => ['required', 'integer', 'exists:levels,id'],
             'experience' => ['nullable', 'string', 'max:255'],
             'bio' => ['nullable', 'string'],
+            'services' => ['nullable', 'array'],
+            'services.*' => ['exists:services,id'],
         ], [
             'level_id.required' => 'Выберите уровень квалификации мастера.',
             'level_id.exists' => 'Выбранный уровень не существует в системе.',
@@ -111,6 +128,9 @@ class SpecialistController extends Controller
         ]);
 
         $specialist->update($validated);
+
+        // Синхронизация услуг через связь service_specialist
+        $specialist->service_specialist()->sync($request->services ?? []);
 
         return redirect()->route('admin.specialists.index')
             ->with('success', 'Данные мастера успешно обновлены.');

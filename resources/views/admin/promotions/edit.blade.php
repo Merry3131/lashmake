@@ -3,54 +3,46 @@
 @section('title', 'Редактирование акции')
 
 @section('content')
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <div class="w-full px-12 py-10 font-['Rubik'] bg-[#fafafc] min-h-screen"
+    <div class="w-full font-['Manrope'] text-[#1e1f22]"
          x-data="promotionForm()"
          x-init="init()">
 
-        <div class="flex justify-between items-center mb-4 w-full">
-            <div class="text-[#9ca0b0] text-xs space-x-1">
-                <span>Главная</span>
-                <span>/</span>
-                <a href="{{ route('admin.promotions.index') }}" class="hover:text-[#ff5c8a] transition-colors">Акции студии</a>
-                <span>/</span>
-                <span class="text-[#ff5c8a]">Редактирование акции</span>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-gray-100">
+            <div>
+                <h1 class="text-2xl font-normal tracking-wider text-[#1e1f22]">Редактирование акции</h1>
+                <p class="text-sm text-[#7c7e8c] font-light mt-1">Редактирование специального предложения</p>
             </div>
-            <a href="{{ route('admin.promotions.index') }}" class="text-[#9ca0b0] hover:text-[#1e1f22] text-xs tracking-wide transition-colors">
-                ← назад к списку
+            <a href="{{ route('admin.promotions.index') }}" class="text-sm  text-[#7c7e8c] hover:text-[#ff5c8a] transition-colors duration-200 font-medium">
+                ← Назад к списку
             </a>
         </div>
 
-        <h1 class="text-[#1e1f22] text-4xl tracking-tight mb-8 w-full">Редактирование акции</h1>
-
-        <div class="bg-white border border-[#f1f1f5] rounded-3xl p-10 shadow-sm w-full">
-            <form action="{{ route('admin.promotions.update', $promotion->id) }}" method="POST" class="space-y-8 w-full">
+        <div class="w-full bg-white rounded-3xl border border-[#f1f1f5] shadow-sm p-8">
+            <form action="{{ route('admin.promotions.update', $promotion->id) }}" method="POST" class="space-y-6">
                 @csrf
                 @method('PUT')
 
-                <div class="space-y-3 w-full">
-                    <label for="title" class="block text-sm text-[#7c7e8c] ml-1">название акции (отображаемое на сайте)</label>
+                <div class="space-y-2">
+                    <label for="title" class="block text-sm tracking-wider text-[#7c7e8c]">Название акции</label>
                     <input type="text"
                            name="title"
                            id="title"
                            x-model="title"
                            value="{{ old('title', $promotion->title) }}"
-                           placeholder="например: весеннее преображение"
-                           class="w-full bg-[#fafafc] border border-[#e2e2e9] rounded-xl px-5 py-4 text-base text-[#1e1f22] placeholder-[#c4c6d0] focus:outline-none focus:border-[#ff5c8a] transition-colors @error('title') border-red-300 @enderror">
+                           placeholder="Например: Весеннее преображение"
+                           class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all @error('title') border-red-400 @enderror">
                     @error('title')
-                    <p class="text-xs text-red-400 ml-1">{{ $message }}</p>
+                    <p class="text-sm text-red-500 mt-1.5">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-                    <div class="space-y-3">
-                        <label for="service_id" class="block text-sm text-[#7c7e8c] ml-1">услуга студии</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="service_id" class="block text-sm tracking-wider text-[#7c7e8c]">Услуга студии</label>
                         <select name="service_id" id="service_id" x-model="serviceId"
-                                class="w-full bg-[#fafafc] border border-[#e2e2e9] rounded-xl px-5 py-4 text-base text-[#1e1f22] focus:outline-none focus:border-[#ff5c8a] transition-colors">
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
                             <option value="">Выберите услугу...</option>
                             @foreach($services as $service)
                                 <option value="{{ $service->id }}" {{ old('service_id', $promotion->service_id) == $service->id ? 'selected' : '' }}>
@@ -60,14 +52,14 @@
                         </select>
                     </div>
 
-                    <div class="space-y-3">
-                        <label for="specialist_id" class="block text-sm text-[#7c7e8c] ml-1">мастер (необязательно)</label>
+                    <div class="space-y-2">
+                        <label for="specialist_id" class="block text-sm tracking-wider text-[#7c7e8c]">Мастер (необязательно)</label>
                         <select name="specialist_id" id="specialist_id" x-model="specialistId"
-                                class="w-full bg-[#fafafc] border border-[#e2e2e9] rounded-xl px-5 py-4 text-base text-[#1e1f22] focus:outline-none focus:border-[#ff5c8a] transition-colors">
-                            <option value="">все мастера студии</option>
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
+                            <option value="">Все мастера студии</option>
                             @foreach($specialists as $specialist)
                                 <option value="{{ $specialist->id }}" {{ old('specialist_id', $promotion->specialist_id) == $specialist->id ? 'selected' : '' }}>
-                                    {{ $specialist->user->last_name }} {{ $specialist->user->first_name }} {{ $specialist->user->middle_name ?? '' }}
+                                    {{ $specialist->user->last_name }} {{ $specialist->user->first_name }}
                                     @if(!empty($specialist->level->name))
                                         ({{ $specialist->level->name }})
                                     @endif
@@ -77,55 +69,55 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-                    <div class="space-y-3">
-                        <label for="discount_percent" class="block text-sm text-[#7c7e8c] ml-1">скидка (%)</label>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <label for="discount_percent" class="block text-sm tracking-wider text-[#7c7e8c]">Размер скидки (%)</label>
                         <input type="number" name="discount_percent" id="discount_percent"
                                x-model="discountPercent"
                                min="1" max="100" step="1"
-                               class="w-full bg-[#fafafc] border border-[#e2e2e9] rounded-xl px-5 py-4 text-base text-[#1e1f22] focus:outline-none focus:border-[#ff5c8a] transition-colors">
+                               class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
                     </div>
 
-                    <div class="space-y-3">
-                        <label class="block text-sm text-[#7c7e8c] ml-1">базовая цена</label>
-                        <div class="bg-[#f5f5f7] border border-[#e2e2e9] rounded-xl px-5 py-4 text-base text-[#1e1f22]">
+                    <div class="space-y-2">
+                        <label class="block text-sm tracking-wider text-[#7c7e8c]">Базовая цена</label>
+                        <div class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-100 text-sm text-slate-600">
                             <span x-text="basePriceDisplay">—</span>
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <label class="block text-sm text-[#7c7e8c] ml-1">цена со скидкой</label>
-                        <div class="bg-[#fff0f2] border border-[#ffe1e5] rounded-xl px-5 py-4 text-base font-semibold text-[#ff5c8a]">
+                    <div class="space-y-2">
+                        <label class="block text-sm tracking-wider text-[#7c7e8c]">Цена со скидкой</label>
+                        <div class="w-full px-4 py-3 rounded-xl border border-pink-200 bg-pink-50 text-sm font-semibold text-pink-600">
                             <span x-text="discountedPriceDisplay">—</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-                    <div class="space-y-3">
-                        <label for="start_date" class="block text-sm text-[#7c7e8c] ml-1">дата начала</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="start_date" class="block text-sm tracking-wider text-[#7c7e8c]">Дата начала акции</label>
                         <input type="date" name="start_date" id="start_date"
                                x-model="startDate"
                                value="{{ old('start_date', is_string($promotion->start_date) ? $promotion->start_date : $promotion->start_date->format('Y-m-d')) }}"
-                               class="w-full bg-[#fafafc] border border-[#e2e2e9] rounded-xl px-5 py-4 text-base text-[#1e1f22] focus:outline-none focus:border-[#ff5c8a] transition-colors">
+                               class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
                     </div>
-                    <div class="space-y-3">
-                        <label for="end_date" class="block text-sm text-[#7c7e8c] ml-1">дата окончания</label>
+                    <div class="space-y-2">
+                        <label for="end_date" class="block text-sm tracking-wider text-[#7c7e8c]">Дата окончания</label>
                         <input type="date" name="end_date" id="end_date"
                                x-model="endDate"
                                value="{{ old('end_date', is_string($promotion->end_date) ? $promotion->end_date : $promotion->end_date->format('Y-m-d')) }}"
-                               class="w-full bg-[#fafafc] border border-[#e2e2e9] rounded-xl px-5 py-4 text-base text-[#1e1f22] focus:outline-none focus:border-[#ff5c8a] transition-colors">
+                               class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
                     </div>
                 </div>
 
-                <div class="pt-10 flex justify-between items-center border-t border-[#f1f1f5] w-full">
+                <div class="flex justify-between items-center pt-6 border-t border-slate-100">
                     <a href="{{ route('admin.promotions.index') }}"
-                       class="text-sm text-[#1e1f22] tracking-widest hover:text-[#ff5c8a] transition-colors uppercase">
-                        отмена
+                       class="w-full sm:w-auto sm:px-8 py-3.5 border border-gray-200 text-gray-500 hover:text-[#1e1f22] hover:bg-gray-50 text-xs  font-normal rounded-xl transition-all duration-200 text-center">
+                        Отмена
                     </a>
                     <button type="submit"
-                            class="bg-[#e31e65] hover:bg-[#c41353] text-white text-base py-4 px-10 rounded-2xl transition-all duration-200 shadow-sm font-medium">
-                        сохранить изменения
+                            class="w-full sm:w-auto sm:px-8 py-3.5 bg-[#ff5c8a] hover:bg-[#e04b75] text-white text-xs  font-normal rounded-xl transition-all duration-300 shadow-sm cursor-pointer">
+                        Сохранить изменения
                     </button>
                 </div>
             </form>
@@ -168,7 +160,7 @@
                         const specialistPrice = data.specialists[this.specialistId];
                         return specialistPrice ? specialistPrice.price : null;
                     }
-                    return null; // для диапазона не считаем скидку
+                    return null;
                 },
 
                 get discountedPriceDisplay() {
@@ -184,9 +176,7 @@
                     return discounted.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽';
                 },
 
-                init() {
-                    // Ничего дополнительного не требуется, Alpine автоматически подхватит начальные значения
-                }
+                init() {}
             }
         }
     </script>

@@ -43,8 +43,8 @@ class AppointmentNotification extends Notification implements ShouldQueue
         if ($this->type === 'created') {
             return [
                 'type' => 'created',
-                'title' => 'новая запись',
-                'message' => "вы успешно записались на услугу «{$serviceName}» к мастеру {$masterName} на {$date} в {$time}.",
+                'title' => 'Новая запись',
+                'message' => "Вы успешно запись на услугу «{$serviceName}» к мастеру {$masterName} на {$date} в {$time}. За день до вашей записи, вам позвонит наш администратор для подтверждения вашего прихода.",
                 'appointment_id' => $this->appointment->id,
             ];
         }
@@ -52,8 +52,8 @@ class AppointmentNotification extends Notification implements ShouldQueue
         if ($this->type === 'confirmed') {
             return [
                 'type' => 'confirmed',
-                'title' => 'запись подтверждена',
-                'message' => "ваша запись на услугу «{$serviceName}» ({$date} в {$time}) успешно подтверждена. ждем вас в нашем салоне!",
+                'title' => 'Запись подтверждена',
+                'message' => "Ваша запись на услугу «{$serviceName}» ({$date} в {$time}) успешно подтверждена. Ждем вас в нашем салоне!",
                 'appointment_id' => $this->appointment->id,
             ];
         }

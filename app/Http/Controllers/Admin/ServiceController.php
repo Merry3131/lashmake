@@ -12,6 +12,10 @@ class ServiceController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function print()
+    {
+        return response('Работает!');
+    }
     public function index()
     {
         $services = Service::orderBy('name', 'asc')->get();

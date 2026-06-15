@@ -4,19 +4,16 @@
 
 @section('content')
     <div class="w-full font-['Manrope'] text-[#1e1f22]">
-
-        {{-- ВЕРХНЯЯ ЧАСТЬ: ЗАГОЛОВОК И КНОПКА ДОБАВЛЕНИЯ --}}
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-gray-100">
             <div>
-                <h1 class="text-2xl font-normal tracking-wider uppercase text-[#1e1f22] font-[Playfair_Display]">Специалисты (Мастера)</h1>
+                <h1 class="text-2xl font-normal tracking-wider  text-[#1e1f22] font-[Playfair_Display]">Мастера</h1>
                 <p class="text-xs text-[#7c7e8c] font-light mt-1">Управление командой мастеров, их квалификацией и профилями</p>
             </div>
-            <a href="{{ route('admin.specialists.create') }}" class="inline-flex items-center justify-center px-5 py-3 bg-[#ff5c8a] hover:bg-[#e04b75] text-white text-xs tracking-wider uppercase font-normal rounded-xl transition-all duration-300 shadow-sm hover:cursor-pointer">
+            <a href="{{ route('admin.specialists.create') }}" class="inline-flex items-center justify-center px-5 py-3 bg-[#ff5c8a] hover:bg-[#e04b75] text-white text-xs tracking-wider  font-normal rounded-xl transition-all duration-300 shadow-sm hover:cursor-pointer">
                 + Добавить мастера
             </a>
         </div>
 
-        {{-- УВЕДОМЛЕНИЕ ОБ УСПЕШНОМ ДЕЙСТВИИ --}}
         @if(session('success'))
             <div class="relative mb-6">
                 <input type="checkbox" id="hide-alert-checkbox" class="peer hidden" />
@@ -25,25 +22,24 @@
                         <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white text-xs font-normal">✓</span>
                         <span>{{ session('success') }}</span>
                     </div>
-                    <label for="hide-alert-checkbox" class="ms-4 p-1.5 inline-flex items-center justify-center rounded-xl text-emerald-500 hover:bg-emerald-100 hover:text-emerald-900 transition-colors cursor-pointer text-xs uppercase tracking-wider">
+                    <label for="hide-alert-checkbox" class="ms-4 p-1.5 inline-flex items-center justify-center rounded-xl text-emerald-500 hover:bg-emerald-100 hover:text-emerald-900 transition-colors cursor-pointer text-xs  tracking-wider">
                         Закрыть
                     </label>
                 </div>
             </div>
         @endif
 
-        {{-- ТАБЛИЦА НА ВСЮ ШИРИНУ --}}
         <div class="w-full bg-white rounded-3xl border border-[#f1f1f5] shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                    <tr class="border-b border-[#f1f1f5] text-[#7c7e8c] text-[10px] font-medium uppercase tracking-wider bg-[#f8f8fa]">
-                        <th class="px-6 py-4">ФИО Специалиста</th>
-                        <th class="px-6 py-4">Email</th>
-                        <th class="px-6 py-4">Квалификация</th>
-                        <th class="px-6 py-4">Опыт</th>
-                        <th class="px-6 py-4">Описание</th>
-                        <th class="px-6 py-4 text-right">Действия</th>
+                    <tr class="border-b border-[#f1f1f5] text-[#7c7e8c] text-[10px] font-medium  tracking-wider bg-[#f8f8fa]">
+                        <th class="px-6 py-4 text-sm  tracking-wider text-[#7c7e8c] font-medium">ФИО Специалиста</th>
+                        <th class="px-6 py-4 text-sm  tracking-wider text-[#7c7e8c] font-medium">Email</th>
+                        <th class="px-6 py-4 text-sm  tracking-wider text-[#7c7e8c] font-medium">Квалификация</th>
+                        <th class="px-6 py-4 text-sm  tracking-wider text-[#7c7e8c] font-medium">Опыт</th>
+                        <th class="px-6 py-4 text-sm  tracking-wider text-[#7c7e8c] font-medium text-center">Описание</th>
+                        <th class="px-6 py-4 text-sm  tracking-wider text-[#7c7e8c] font-medium text-right">Действия</th>
                     </tr>
                     </thead>
                     <tbody class="divide-y divide-[#f1f1f5] text-sm font-light">

@@ -12,8 +12,37 @@
             selectedDate: '{{ old('appointment_date', \Carbon\Carbon::parse($appointment->appointment_at)->format('Y-m-d')) }}',
             selectedTime: '{{ old('appointment_time', \Carbon\Carbon::parse($appointment->appointment_at)->format('H:i')) }}',
             availableSlots: [],
+            availableServices: [],
             loading: false,
-            initialLoad: true, {{-- Чтобы не сбрасывать текущее время записи при первой загрузке слотов --}}
+            loadingServices: false,
+            initialLoad: true,
+
+            async loadServices() {
+                if (!this.selectedSpecialist) {
+                    this.availableServices = [];
+                    this.selectedService = '';
+                    return;
+                }
+
+                this.loadingServices = true;
+
+                try {
+                    let response = await fetch(`/api/specialist/${this.selectedSpecialist}/services`);
+                    let services = await response.json();
+                    this.availableServices = services;
+
+                    let currentServiceExists = services.some(s => s.id == this.selectedService);
+                    if (!currentServiceExists && services.length > 0) {
+                        this.selectedService = services[0].id;
+                    } else if (services.length === 0) {
+                        this.selectedService = '';
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки услуг:', error);
+                } finally {
+                    this.loadingServices = false;
+                }
+            },
 
             async loadSlots() {
                 if (!this.selectedSpecialist || !this.selectedDate || !this.selectedService) {
@@ -24,19 +53,16 @@
                 this.loading = true;
 
                 try {
-                    // Передаем service_id, чтобы учитывалась длительность, и ID текущей записи, чтобы её же время не заблокировалось
                     let response = await fetch(`/api/slots?specialist_id=${this.selectedSpecialist}&date=${this.selectedDate}&service_id=${this.selectedService}&ignore_appointment_id={{ $appointment->id }}`);
                     let slots = await response.json();
 
                     this.availableSlots = slots;
 
-                    // Если это первая загрузка и текущего времени записи нет в свободных слотах, принудительно добавим его в массив слотов, чтобы плитка отобразилась активной
                     if (this.initialLoad && this.selectedTime && !this.availableSlots.includes(this.selectedTime)) {
                         this.availableSlots.push(this.selectedTime);
                         this.availableSlots.sort();
                     }
 
-                    // Если админ вручную меняет параметры (уже после первой загрузки) и старое время не подходит — сбрасываем его
                     if (!this.initialLoad && this.selectedTime && !this.availableSlots.includes(this.selectedTime)) {
                         this.selectedTime = null;
                     }
@@ -49,17 +75,17 @@
             }
          }"
          x-init="
+            loadServices();
             loadSlots();
-            $watch('selectedSpecialist', () => loadSlots());
+            $watch('selectedSpecialist', () => { loadServices(); loadSlots(); });
             $watch('selectedDate', () => loadSlots());
             $watch('selectedService', () => loadSlots());
          ">
 
-        <main class="p-8">
-            {{-- Вывод ошибок валидации, если бэкенд вернет редирект --}}
+        <main class="p-8 w-full">
             @if ($errors->any())
-                <div class="max-w-xl mb-5 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm shadow-sm">
-                    <strong class="block mb-1">⚠️ Ошибка изменения записи:</strong>
+                <div class="w-full mb-5 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm shadow-sm">
+                    <strong class="block mb-1">Ошибка изменения записи:</strong>
                     <ul class="list-disc pl-5 space-y-1 text-xs">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -68,10 +94,10 @@
                 </div>
             @endif
 
-            <div class="max-w-xl bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+            <div class="w-full bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-xl font-bold text-slate-800">Редактирование записи №{{ $appointment->id }}</h1>
-                    <a href="{{ route('admin.appointments.index') }}" class="text-xs font-semibold text-slate-400 hover:text-slate-600 transition-colors">
+                    <h1 class="text-xl font-semibold text-slate-800">Редактирование записи №{{ $appointment->id }}</h1>
+                    <a href="{{ route('admin.appointments.index') }}" class="text-xs text-slate-400 hover:text-slate-600 transition-colors">
                         ← Назад к списку
                     </a>
                 </div>
@@ -80,45 +106,26 @@
                     @csrf
                     @method('PUT')
 
-                    {{-- ИНФОРМАЦИЯ О КЛИЕНТЕ (Только для чтения) --}}
                     <div class="p-4 bg-slate-50/80 rounded-xl border border-slate-100 space-y-1">
-                        <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Клиент</span>
-                        <div class="text-sm font-bold text-slate-800">
+                        <span class="block text-sm tracking-wider text-slate-400">Клиент</span>
+                        <div class="text-sm text-slate-800">
                             {{ $appointment->user->last_name }} {{ $appointment->user->name }}
                         </div>
-                        <div class="text-xs text-slate-500 font-medium">
+                        <div class="text-xs text-slate-500">
                             {{ $appointment->user->phone ?? 'Телефон не указан' }}
                         </div>
                     </div>
 
-                    {{-- ВЫБОР УСЛУГИ --}}
                     <div>
-                        <label for="service_id" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Услуга</label>
-                        <select id="service_id"
-                                name="service_id"
-                                x-model="selectedService"
-                                required
-                                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all font-medium">
-                            @foreach(\App\Models\Service::all() as $service)
-                                <option value="{{ $service->id }}">{{ $service->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('service_id')
-                        <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    {{-- ВЫБОР МАСТЕРА --}}
-                    <div>
-                        <label for="specialist_id" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Мастер</label>
+                        <label for="specialist_id" class="block text-xs tracking-wider text-slate-500 mb-2">Мастер</label>
                         <select id="specialist_id"
                                 name="specialist_id"
                                 x-model="selectedSpecialist"
                                 required
-                                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all font-medium">
-                            @foreach(\App\Models\Specialist::with('user')->get() as $specialist)
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
+                            @foreach($specialists as $specialist)
                                 <option value="{{ $specialist->id }}">
-                                    {{ $specialist->user->last_name }} {{ $specialist->user->name }} ({{ $specialist->level->name ?? 'Мастер' }})
+                                    {{ $specialist->user->last_name }} {{ $specialist->user->first_name }} ({{ $specialist->level->name ?? 'Мастер' }})
                                 </option>
                             @endforeach
                         </select>
@@ -127,45 +134,62 @@
                         @enderror
                     </div>
 
-                    {{-- ВЫБОР ДАТЫ --}}
                     <div>
-                        <label for="appointment_date" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Дата записи</label>
+                        <label for="service_id" class="block text-xs tracking-wider text-slate-500 mb-2">
+                            Услуга
+                            <span x-show="loadingServices" class="text-pink-500 text-xs ml-2 animate-pulse">(Загрузка...)</span>
+                        </label>
+                        <select id="service_id"
+                                name="service_id"
+                                x-model="selectedService"
+                                required
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
+                            <option value="">-- Сначала выберите мастера --</option>
+                            <template x-for="service in availableServices" :key="service.id">
+                                <option :value="service.id" x-text="service.name"></option>
+                            </template>
+                        </select>
+                        @error('service_id')
+                        <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="appointment_date" class="block text-xs tracking-wider text-slate-500 mb-2">Дата записи</label>
                         <input type="date"
                                id="appointment_date"
                                name="appointment_date"
                                x-model="selectedDate"
                                required
-                               class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all font-medium">
+                               min="{{ date('Y-m-d') }}"
+                               class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
                         @error('appointment_date')
                         <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    {{-- СЛОТЫ ВРЕМЕНИ --}}
                     <div class="mt-4">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+                        <label class="block text-xs tracking-wider text-slate-500 mb-3">
                             Время записи
-                            <span x-show="loading" class="text-pink-500 text-xs ml-2 font-normal animate-pulse">(Обновление слотов...)</span>
+                            <span x-show="loading" class="text-pink-500 text-xs ml-2 animate-pulse">(Обновление слотов...)</span>
                         </label>
 
                         <input type="hidden" name="appointment_time" x-model="selectedTime" required>
 
-                        {{-- Если слотов нет --}}
                         <template x-if="availableSlots.length === 0 && !loading && selectedSpecialist && selectedDate && selectedService">
-                            <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl text-amber-800 text-xs font-medium">
-                                ⚠️ У мастера нет окон на эту дату для выбранной услуги.
+                            <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl text-amber-800 text-xs">
+                                У мастера нет окон на эту дату для выбранной услуги.
                             </div>
                         </template>
 
-                        {{-- Сетка плиток времени --}}
-                        <div class="grid grid-cols-4 gap-2">
+                        <div class="grid grid-cols-6 gap-2">
                             <template x-for="slot in availableSlots" :key="slot">
                                 <button type="button"
                                         @click="selectedTime = slot"
                                         :class="selectedTime === slot
-                                            ? 'bg-pink-500 text-white border-pink-500 shadow-md shadow-pink-100 scale-[1.02]'
+                                            ? 'bg-pink-500 text-white border-pink-500 shadow-md shadow-pink-100'
                                             : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'"
-                                        class="py-2.5 text-center text-sm font-semibold rounded-xl border transition-all duration-150 cursor-pointer">
+                                        class="py-2 text-center text-xs rounded-lg border transition-all duration-150 cursor-pointer">
                                     <span x-text="slot"></span>
                                 </button>
                             </template>
@@ -176,29 +200,27 @@
                         @enderror
                     </div>
 
-                    {{-- СТАТУС ЗАПИСИ --}}
                     <div>
-                        <label for="status" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Статус записи</label>
+                        <label for="status" class="block text-xs tracking-wider text-slate-500 mb-2">Статус записи</label>
                         <select id="status" name="status" required
-                                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all font-medium">
-                            <option value="pending" {{ old('status', $appointment->status) == 'pending' ? 'selected' : '' }}>Ожидает подтверждения (Pending)</option>
-                            <option value="approved" {{ old('status', $appointment->status) == 'approved' ? 'selected' : '' }}>Подтверждена (Approved)</option>
-                            <option value="completed" {{ old('status', $appointment->status) == 'completed' ? 'selected' : '' }}>Выполнена (Completed)</option>
-                            <option value="cancelled" {{ old('status', $appointment->status) == 'cancelled' ? 'selected' : '' }}>Отменена (Cancelled)</option>
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
+                            <option value="pending" {{ old('status', $appointment->status) == 'pending' ? 'selected' : '' }}>Ожидает подтверждения</option>
+                            <option value="approved" {{ old('status', $appointment->status) == 'approved' ? 'selected' : '' }}>Подтверждена</option>
+                            <option value="completed" {{ old('status', $appointment->status) == 'completed' ? 'selected' : '' }}>Выполнена</option>
+                            <option value="cancelled" {{ old('status', $appointment->status) == 'cancelled' ? 'selected' : '' }}>Отменена</option>
                         </select>
                         @error('status')
                         <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    {{-- КНОПКИ УПРАВЛЕНИЯ --}}
-                    <div class="flex gap-3 pt-4 border-t border-slate-100">
+                    <div class="flex justify-between items-center pt-6 border-t border-slate-100">
                         <a href="{{ route('admin.appointments.index') }}"
-                           class="w-full py-3.5 text-center text-slate-700 font-bold rounded-xl transition-all tracking-wide text-xs uppercase bg-slate-100 hover:bg-slate-200">
+                           class="px-6 py-2 text-center text-slate-600 rounded-lg transition-all tracking-wide text-xs bg-slate-100 hover:bg-slate-200 hover:text-slate-800">
                             Отмена
                         </a>
                         <button type="submit"
-                                class="w-full py-3.5 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl transition-all shadow-md shadow-pink-100 tracking-wide text-xs uppercase">
+                                class="px-6 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg transition-all shadow-sm hover:shadow-md tracking-wide text-xs">
                             Сохранить изменения
                         </button>
                     </div>

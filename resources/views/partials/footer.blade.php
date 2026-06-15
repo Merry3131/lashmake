@@ -12,7 +12,7 @@
             </div>
 
             <div class="flex flex-col items-center md:items-start">
-                <h1 class="text-lg font-normal mb-4 uppercase tracking-wider font-[Playfair_Display]">Информация</h1>
+                <h1 class="text-lg font-normal mb-4   font-[Playfair_Display]">Информация</h1>
                 <ul class="space-y-2 text-sm font-light text-center md:text-left">
                     <li><a href="#" class="hover:text-pink-600 transition">О нас</a></li>
                     <li><a href="#" class="hover:text-pink-600 transition">Услуги</a></li>
@@ -22,14 +22,14 @@
             </div>
 
             <div class="flex flex-col items-center md:items-start">
-                <h1 class="text-lg font-normal mb-4 uppercase tracking-wider font-[Playfair_Display]">Контакты</h1>
+                <h1 class="text-lg font-normal mb-4   font-[Playfair_Display]">Контакты</h1>
                 <div class="space-y-3 text-center md:text-left">
                     <p class="text-sm">
-                        <span class="block text-xs uppercase text-gray-600 tracking-tighter">Телефон:</span>
+                        <span class="block text-sm  text-gray-600 tracking-tighter">Телефон:</span>
                         <a href="tel:89655126321" class="text-lg font-normal hover:text-pink-600 transition">8 (965) 512 63 21</a>
                     </p>
                     <div class="pt-2">
-                        <span class="block text-xs uppercase text-gray-600 tracking-tighter mb-2">Мы в соцсетях:</span>
+                        <span class="block text-sm  text-gray-600 tracking-tighter mb-2">Мы в соцсетях:</span>
                         <a href="#" class="inline-block bg-white p-2 rounded-full hover:bg-pink-400 hover:text-white transition shadow-sm">
                             <span class="text-sm font-light px-2">Вконтакте</span>
                         </a>
@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        <div class="border-t border-gray-400 pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] uppercase tracking-widest text-gray-600">
+        <div class="border-t border-gray-400 pt-8 flex flex-col md:flex-row justify-between items-center text-[10px]  tracking-widest text-gray-600">
             <p>© 2026 Центр Ресниц. Все права защищены.</p>
         </div>
     </div>

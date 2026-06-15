@@ -1,23 +1,17 @@
 <x-app-layout title="Центр Ресниц | Главная">
 
-    {{-- Применяем подключенные шрифты Playfair Display и Manrope --}}
     <style>
-        /* Все заголовки и элементы с классом font-serif получают Playfair Display */
         h1, h2, h3, h4, h5, h6,
         .font-serif,
         [class*="font-serif"] {
             font-family: 'Playfair Display', serif !important;
         }
-
-        /* Основной текст — Manrope */
         body, p, span, button, a, li, div,
         .text-gray-600, .text-gray-500, .text-gray-400,
         .tracking-widest, .uppercase,
         input, textarea, select {
             font-family: 'Manrope', sans-serif;
         }
-
-        /* Для кнопок и ссылок сохраняем Manrope */
         button, a, .btn {
             font-family: 'Manrope', sans-serif;
         }
@@ -43,10 +37,10 @@
             </div>
 
             <div class="relative z-10 w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left">
-                <span class="text-xs tracking-widest text-[#bd0055] font-light mb-4">
-                    Студия красоты Алёны Хабибуллиной
+                <span class="text-xl text-[#bd0055] font-light mb-4">
+                    Салон красоты Алёны Хабибуллиной
                 </span>
-                <h1 class="text-4xl md:text-6xl font-serif text-gray-900 leading-tight">
+                <h1 class="text-2xl md:text-4xl text-gray-900">
                     Искусство быть собой
                 </h1>
                 <p class="mt-6 text-gray-600 text-sm md:text-base tracking-wide leading-relaxed font-light max-w-md">
@@ -56,9 +50,7 @@
                 <div class="mt-10 relative z-20 flex justify-between w-full">
                     <button x-data @click="$store.modalManager.openBooking()"
                             class="group relative border border-pink-500 text-pink-600 px-12 py-3.5 rounded-full text-sm font-light tracking-wide shadow-sm transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-500 overflow-hidden bg-transparent hover:text-white  hover:shadow-lg hover:shadow-pink-900/20">
-                        {{-- Задний фон, который расширяется --}}
                         <span class="absolute inset-0 bg-pink-500 scale-x-0 group-hover:scale-x-100 group-hover:bg-pink-500 origin-left transition-transform duration-500 ease-out pointer-events-none"></span>
-                        {{-- Текст поверх фона --}}
                         <span class="relative z-10">Записаться онлайн</span>
                     </button>
                 </div>
@@ -74,8 +66,6 @@
                 <img src="{{ asset('img/in1.webp') }}"
                      alt="Процесс создания идеального взгляда в Центр Ресниц"
                      class="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700 ease-out">
-
-                {{-- Мягкий затемняющий градиент сверху, чтобы добавить глубины фотографии --}}
                 <div class="absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent pointer-events-none"></div>
             </div>
 
@@ -101,13 +91,11 @@
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                 @foreach($categories as $index => $category)
                     <div class="bg-gray-200 relative group overflow-hidden min-h-[320px] md:min-h-[380px] transition-all duration-500 rounded-2xl hover:z-30 hover:shadow-2xl hover:shadow-pink-500/30
-            {{ $index == 0 ? 'md:col-span-7' : '' }}
-            {{ $index == 1 ? 'md:col-span-5' : '' }}
-            {{ $index == 2 ? 'md:col-span-5' : '' }}
-            {{ $index == 3 ? 'md:col-span-7' : '' }}
-            {{ $index > 3 ? 'md:col-span-6' : '' }}">
-
-                        {{-- Исправлено inset-02 на inset-0 и добавлено базовое затемнение bg-black/30 для читаемости текста --}}
+                        {{ $index == 0 ? 'md:col-span-7' : '' }}
+                        {{ $index == 1 ? 'md:col-span-5' : '' }}
+                        {{ $index == 2 ? 'md:col-span-5' : '' }}
+                        {{ $index == 3 ? 'md:col-span-7' : '' }}
+                        {{ $index > 3 ? 'md:col-span-6' : '' }}">
                         <div class="absolute inset-0 bg-black/30 transition-colors duration-500 z-10 group-hover:bg-black/20"></div>
 
                         @if($category->hasMedia('categories'))
@@ -123,9 +111,8 @@
                                 {{ $category->description }}
                             </p>
                             <div>
-                                {{-- Добавлены классы group-hover:text-pink-500 и group-hover:border-pink-500 --}}
                                 <a href="{{ url('/services') }}"
-                                   class="inline-block text-[10px] p-2 tracking-[0.2em] border-b border-white/60 pb-1 hover:border-pink-400 transition-all duration-300 group-hover:text-pink-500 group-hover:bg-pink-50 group-hover:border-pink-500 rounded-sm">
+                                   class="inline-block text-[11px] px-4 py-2.5 font-medium tracking-[0.15em] bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full shadow-md hover:shadow-lg hover:from-pink-600 hover:to-rose-600 transition-all duration-300 ease-out hover:scale-105 active:scale-95">
                                     Подробнее
                                 </a>
                             </div>
@@ -138,7 +125,6 @@
 
     <div class="bg-[#fcfaf7] pb-32"
          x-data="{
-        // Список всех картинок в порядке возрастания с их расширениями
         images: [
             '{{ asset('img/studia/1.jpg') }}',
             '{{ asset('img/studia/2.jpg') }}',
@@ -147,16 +133,16 @@
             '{{ asset('img/studia/5.webp') }}',
             '{{ asset('img/studia/6.webp') }}'
         ],
-        // Индекс первой видимой картинки
+
         startIndex: 0,
 
-        // Количество отображаемых картинок (1 на мобилках, 3 на экранах побольше)
+
         get itemsToShow() {
             return window.innerWidth < 640 ? 1 : 3;
         },
 
         next() {
-            // Листаем вперед: если дошли до конца, возвращаемся в начало
+
             if (this.startIndex + this.itemsToShow < this.images.length) {
                 this.startIndex++;
             } else {
@@ -165,7 +151,7 @@
         },
 
         prev() {
-            // Листаем назад: если в самом начале, перепрыгиваем в конец
+
             if (this.startIndex > 0) {
                 this.startIndex--;
             } else {
@@ -226,7 +212,7 @@
                                      class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500">
                             @endif
                         </div>
-                        <h4 class="font-semibold text-sm md:text-base text-gray-900">
+                        <h4 class=" text-sm md:text-base text-gray-900">
                             {{ $specialist->user->first_name }} {{ $specialist->user->last_name }}
                         </h4>
                         <p class="text-xs text-gray-400 mt-1 font-light">
@@ -282,7 +268,7 @@
                         Запишитесь прямо сейчас к нашему топ-мастеру онлайн и получите бесплатный сеанс расслабляющего массажа тела.
                     </p>
                     <button x-data @click="$store.modalManager.openBooking()"
-                            class="bg-white text-red-600 border border-pink-200 px-10 py-4 uppercase text-xs font-bold tracking-[0.2em] hover:bg-gray-900 hover:text-white hover:border-gray-900 rounded-xl transition-all duration-300 shadow-sm">
+                            class="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-10 py-4 uppercase text-xs font-bold tracking-[0.2em] hover:from-rose-600 hover:to-pink-600 hover:shadow-xl hover:scale-105 active:scale-95 rounded-full transition-all duration-300 shadow-lg">
                         Записаться
                     </button>
                 </div>

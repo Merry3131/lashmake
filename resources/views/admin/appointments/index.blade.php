@@ -5,22 +5,20 @@
 @section('content')
     <div class="w-full font-['Manrope'] text-[#1e1f22]">
 
-        {{-- ВЕРХНЯЯ ЧАСТЬ: ЗАГОЛОВОК И КНОПКА ДОБАВЛЕНИЯ (РАСТЯНУТО) --}}
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-gray-100">
             <div>
-                <h1 class="text-2xl font-normal tracking-wider uppercase text-[#1e1f22] font-[Playfair_Display]">Записи салона</h1>
+                <h1 class="text-2xl l tracking-wider  text-[#1e1f22] font-[Playfair_Display]">Записи салона</h1>
                 <p class="text-xs text-[#7c7e8c] font-light mt-1">Просмотр, редактирование и отмена записей клиентов студии</p>
             </div>
-            <a href="{{ route('admin.appointments.create') }}" class="inline-flex items-center justify-center px-5 py-3 bg-[#ff5c8a] hover:bg-[#e04b75] text-white text-xs tracking-wider uppercase font-normal rounded-xl transition-all duration-300 shadow-sm hover:cursor-pointer whitespace-nowrap">
+            <a href="{{ route('admin.appointments.create') }}" class="inline-flex items-center justify-center px-5 py-3 bg-[#ff5c8a] hover:bg-[#e04b75] text-white text-xs tracking-wider  l rounded-xl transition-all duration-300 shadow-sm hover:cursor-pointer whitespace-nowrap">
                 + Новая запись
             </a>
         </div>
 
-        {{-- УВЕДОМЛЕНИЕ ОБ УСПЕШНОМ ДЕЙСТВИИ --}}
         @if(session('success'))
             <div class="relative mb-6">
                 <input type="checkbox" id="hide-alert-checkbox" class="peer hidden" />
-                <div class="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl text-xs font-normal tracking-wide shadow-sm peer-checked:hidden transition-all">
+                <div class="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-2xl text-xs l tracking-wide shadow-sm peer-checked:hidden transition-all">
                     <div class="flex items-center gap-3">
                         <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white text-[10px] font-bold">✓</span>
                         <span>{{ session('success') }}</span>
@@ -34,72 +32,65 @@
             </div>
         @endif
 
-        {{-- ПОЛНОШИРИННАЯ ТАБЛИЦА С ЗАПИСЯМИ --}}
         <div class="w-full bg-white rounded-3xl border border-[#f1f1f5] shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full border-collapse text-left">
                     <thead>
                     <tr class="border-b border-[#f1f1f5] bg-[#f8f8fa]">
-                        <th scope="col" class="px-6 py-4 text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium w-16 text-center">ID</th>
-                        <th scope="col" class="px-6 py-4 text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium">Клиент</th>
-                        <th scope="col" class="px-6 py-4 text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium">Услуга</th>
-                        <th scope="col" class="px-6 py-4 text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium">Мастер</th>
-                        <th scope="col" class="px-6 py-4 text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium">Дата и время</th>
-                        <th scope="col" class="px-6 py-4 text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium">Статус</th>
-                        <th scope="col" class="px-6 py-4 text-[10px] uppercase tracking-wider text-[#7c7e8c] font-medium text-right pr-8">Действия</th>
+                        <th scope="col" class="px-6 py-4 text-sm  tracking-wider text-[#7c7e8c] font-medium">Клиент</th>
+                        <th scope="col" class="px-6 py-4 text-sm  tracking-wider text-[#7c7e8c] font-medium">Услуга</th>
+                        <th scope="col" class="px-6 py-4 text-sm  tracking-wider text-[#7c7e8c] font-medium">Мастер</th>
+                        <th scope="col" class="px-6 py-4 text-sm  tracking-wider text-[#7c7e8c] font-medium">Дата и время</th>
+                        <th scope="col" class="px-6 py-4 text-sm  tracking-wider text-[#7c7e8c] font-medium">Статус</th>
+                        <th scope="col" class="px-6 py-4 text-sm  tracking-wider text-[#7c7e8c] font-medium text-right pr-8">Действия</th>
                     </tr>
                     </thead>
                     <tbody class="divide-y divide-[#f1f1f5]">
                     @forelse($appointments as $appointment)
                         <tr class="hover:bg-[#f8f8fa]/50 transition-colors duration-200">
-                            {{-- ID --}}
-                            <td class="px-6 py-4.5 text-xs text-[#7c7e8c] font-light text-center bg-[#f8f8fa]/30">
-                                {{ $appointment->id }}
-                            </td>
 
-                            {{-- Клиент --}}
-                            <td class="px-6 py-4.5 text-sm font-normal text-[#1e1f22] whitespace-nowrap">
+                            <td class="px-6 py-4.5 text-sm l text-[#1e1f22] whitespace-nowrap">
                                 <div class="font-medium">{{ $appointment->user->first_name }} {{ $appointment->user->last_name }}</div>
                                 <div class="text-xs text-[#7c7e8c] font-light mt-0.5">{{ $appointment->user->phone }}</div>
                             </td>
 
-                            {{-- Услуга --}}
-                            <td class="px-6 py-4.5 text-sm font-normal text-[#1e1f22]">
+                            <td class="px-6 py-4.5 text-sm l text-[#1e1f22]">
                                 {{ $appointment->service->name }}
                             </td>
 
-                            {{-- Мастер --}}
                             <td class="px-6 py-4.5 text-sm text-[#7c7e8c] font-light whitespace-nowrap">
                                 {{ $appointment->specialist->user->first_name }} {{ $appointment->specialist->user->last_name }}
                             </td>
 
-                            {{-- Дата и время --}}
-                            <td class="px-6 py-4.5 text-sm font-normal text-[#1e1f22] whitespace-nowrap">
+                            <td class="px-6 py-4.5 text-sm l text-[#1e1f22] whitespace-nowrap">
                                 {{ \Carbon\Carbon::parse($appointment->appointment_at)->format('d.m.Y H:i') }}
                             </td>
 
-                            {{-- Статус --}}
                             <td class="px-6 py-4.5 whitespace-nowrap">
                                 @switch($appointment->status)
                                     @case('pending')
-                                        <span class="inline-flex items-center px-2.5 py-1 text-[11px] font-normal tracking-wide uppercase rounded-lg bg-amber-50 text-amber-700 border border-amber-100">
+                                        <span class="inline-flex items-center px-2.5 py-1 text-sm tracking-wide rounded-lg bg-amber-50 text-amber-700">
                                             Ожидает
                                         </span>
                                         @break
                                     @case('confirmed')
-                                        <span class="inline-flex items-center px-2.5 py-1 text-[11px] font-normal tracking-wide uppercase rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                        <span class="inline-flex items-center px-2.5 py-1 text-sm l tracking-wide rounded-lg bg-emerald-50 text-emerald-700">
                                             Подтверждена
                                         </span>
                                         @break
+                                    @case('completed')
+                                        <span class="inline-flex items-center px-2.5 py-1 text-sm l tracking-wide rounded-lg bg-blue-50 text-blue-700">
+                                            Выполнена
+                                        </span>
+                                        @break
                                     @case('cancelled')
-                                        <span class="inline-flex items-center px-2.5 py-1 text-[11px] font-normal tracking-wide uppercase rounded-lg bg-rose-50 text-rose-600 border border-rose-100">
+                                        <span class="inline-flex items-center px-2.5 py-1 text-sm l tracking-wide rounded-lg bg-rose-50 text-rose-700">
                                             Отменена
                                         </span>
                                         @break
                                 @endswitch
                             </td>
 
-                            {{-- Действия --}}
                             <td class="px-6 py-4.5 text-right space-x-1.5 pr-8 whitespace-nowrap">
                                 <a href="{{ route('admin.appointments.edit', $appointment->id) }}" class="inline-flex items-center justify-center px-3 py-2 border border-[#f1f1f5] bg-white hover:bg-[#f8f8fa] text-[#1e1f22] text-xs font-light rounded-xl transition-all duration-200 shadow-sm">
                                     Изменить
