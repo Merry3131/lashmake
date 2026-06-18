@@ -55,7 +55,7 @@ class Specialist extends Model implements HasMedia
     public function averageRating()
     {
         $avg = $this->reviews()->avg('rating');
-        return $avg ? round($avg, 1) : 5.0;
+        return $avg ? round($avg, 1) : 0;
     }
 
 //    public function prices(){

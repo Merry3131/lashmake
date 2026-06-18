@@ -27,8 +27,10 @@ Route::get('/services', [ServiceController::class, 'index'])->name('services.ind
 Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
 // специалисты
 Route::get('/team', [TeamController::class, 'index'])->name('team.index');
+Route::get('/team/{team}', [TeamController::class, 'show'])->name('team.show');
 // примеры работ
 Route::get('/example_of_works', [ExamplesOfWorkController::class, 'index'])->name('works.index');
+Route::get('/works/{works}', [ExamplesOfWorkController::class, 'show'])->name('work.show');
 // отзывы
 Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
 Route::get('/reviews/create', [ReviewController::class, 'create'])->name('reviews.create');
@@ -44,12 +46,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::post('/api/appointments', [WorkScheduleController::class, 'store']);
 
 
 
 
 });
+Route::post('/api/appointments', [WorkScheduleController::class, 'store']);
 
 Route::middleware(MasterMiddleware::class)->group(function () {
     Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
@@ -79,7 +81,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // график работы
     Route::resource('/schedule', \App\Http\Controllers\Admin\WorkScheduleController::class);
     Route::get('/services/print', [App\Http\Controllers\Admin\ServiceController::class, 'print'])->name('services.print');
-
+    // модерация отзывов
+    Route::resource('reviews', \App\Http\Controllers\Admin\ReviewController::class)->only(['index', 'update', 'destroy']);
 });
 
 require __DIR__.'/auth.php';

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Category;
 use App\Models\Promotion;
 use App\Models\Specialist;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,5 +31,43 @@ class AppServiceProvider extends ServiceProvider
                 'team' => Specialist::with('user')->get(),
             ]);
         });
+        Validator::replacer('required', function ($message, $attribute, $rule, $parameters) {
+            $attributes = [
+                'first_name' => 'Имя',
+                'last_name' => 'Фамилия',
+                'phone' => 'Телефон',
+                'email' => 'Email',
+                'password' => 'Пароль',
+            ];
+
+            $attributeName = $attributes[$attribute] ?? $attribute;
+            return str_replace(':attribute', $attributeName, 'Поле :attribute обязательно для заполнения');
+        });
+
+        Validator::replacer('email', function ($message, $attribute, $rule, $parameters) {
+            return 'Введите корректный email адрес';
+        });
+
+        Validator::replacer('unique', function ($message, $attribute, $rule, $parameters) {
+            if ($attribute === 'email') {
+                return 'Этот email уже зарегистрирован в системе';
+            }
+            return $message;
+        });
+
+        Validator::replacer('confirmed', function ($message, $attribute, $rule, $parameters) {
+            if ($attribute === 'password') {
+                return 'Пароли не совпадают';
+            }
+            return $message;
+        });
+
+        Validator::replacer('min', function ($message, $attribute, $rule, $parameters) {
+            if ($attribute === 'password') {
+                return 'Пароль должен содержать минимум ' . $parameters[0] . ' символов';
+            }
+            return $message;
+        });
+
     }
 }

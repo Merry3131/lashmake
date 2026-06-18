@@ -20,6 +20,12 @@
         availableSlots: [],
         loading: false,
 
+        guestName: '',
+        guestLastName: '',
+        guestPhone: '+79',
+        guestNameError: '',
+        guestPhoneError: '',
+
          discountPercent: 0,
          promotionSpecialistId: null,
 
@@ -95,11 +101,11 @@
 
             if (promotion.specialist_id) {
                 this.selectedSpecialist = promotion.specialist_id;
-                // Ждём загрузки данных о мастере
+
                 await this.fetchSpecialistInfo(promotion.specialist_id);
-                // Ждём получения цены со скидкой
+
                 await this.fetchCustomPriceAndDuration();
-                // Переходим к выбору даты только после загрузки
+
                 this.step = 'calendar';
             } else {
                 this.step = 'specialists_at_service';
@@ -129,7 +135,8 @@
             this.$watch('selectedSpecialist', value => { this.loadSlots(); this.fetchCustomPriceAndDuration(); });
             this.$watch('selectedDate', value => this.loadSlots());
             this.$watch('selectedService', value => { this.loadSlots(); this.fetchCustomPriceAndDuration(); });
-        }
+        },
+
     }"
      x-show="$store.modalManager.bookingOpen"
      x-cloak
@@ -188,7 +195,7 @@
                      style="top: 80px;">
                     <div class="relative flex items-center justify-center mb-4">
                         <button @click="step = 'main'" class="absolute left-0 text-pink-500 hover:underline text-sm font-[Manrope]">Назад</button>
-                        <h1 class="text-xl text-gray-800 font-[Playfair_Display] font-normal">Выберите услугу</h1>
+                        <h1 class="text-xl text-gray-800 font-[Playfair_Display]">Выберите услугу</h1>
                     </div>
 
                     <div class="max-h-96 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
@@ -529,117 +536,286 @@
                      x-transition:leave="transition ease-in-out duration-200"
                      x-transition:leave-start="opacity-100 transform scale-100"
                      x-transition:leave-end="opacity-0 transform scale-95"
-                     class="absolute inset-x-0 top-24 px-8 pb-8 overflow-y-auto"
+                     class="absolute inset-x-0 top-24 px-8 pb-8 overflow-y-auto custom-scrollbar"
                      style="top: 80px;">
-                    <div class="relative flex items-center justify-center mb-5">
-                        <button @click="step = 'calendar'" class="absolute left-0 text-pink-500 hover:underline text-sm font-[Manrope]">Назад</button>
-                        <h1 class="text-xl text-gray-800 font-[Playfair_Display] font-normal">Проверьте детали записи</h1>
-                    </div>
-
-                    <div class="bg-pink-50/50 border border-pink-100 rounded-2xl p-4 space-y-4">
-                        <div class="flex items-start space-x-3">
-                            <div class="p-2 bg-pink-500 rounded-xl text-white mt-0.5">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="text-sm text-gray-400  font-[Manrope]">Услуга</div>
-                                <div class="text-gray-800 text-base font-[Manrope]" x-text="serviceName"></div>
-                                <div class="text-sm text-gray-500 font-[Manrope]" x-text="'Длительность: ' + serviceDuration"></div>
-                            </div>
+                    <div class="max-h-96 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                        <div class="relative flex items-center justify-center mb-5">
+                            <button @click="step = 'calendar'" class="absolute left-0 text-pink-500 hover:underline text-sm font-[Manrope]">Назад</button>
+                            <h1 class="text-xl text-gray-800 font-[Playfair_Display] font-normal">Проверьте детали записи</h1>
                         </div>
 
-                        <hr class="border-gray-100">
-
-                        <div class="flex items-start space-x-3">
-                            <div class="p-2 bg-pink-500 rounded-xl text-white mt-0.5">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
+                        <div class="bg-pink-50/50 border border-pink-100 rounded-2xl p-4 space-y-4 ">
+                            <div class="flex items-start space-x-3">
+                                <div class="p-2 bg-pink-500 rounded-xl text-white mt-0.5">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-400 font-[Manrope]">Услуга</div>
+                                    <div class="text-gray-800 text-base font-[Manrope]" x-text="serviceName"></div>
+                                    <div class="text-sm text-gray-500 font-[Manrope]" x-text="'Длительность: ' + serviceDuration"></div>
+                                </div>
                             </div>
-                            <div>
-                                <div class="text-sm text-gray-400  font-[Manrope]">Мастер</div>
-                                <div class="text-gray-800 text-base font-[Manrope]" x-text="specialistName"></div>
-                            </div>
-                        </div>
 
-                        <hr class="border-gray-100">
+                            <hr class="border-gray-100">
 
-                        <div class="flex items-start space-x-3">
-                            <div class="p-2 bg-pink-500 rounded-xl text-white mt-0.5">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
+                            <div class="flex items-start space-x-3">
+                                <div class="p-2 bg-pink-500 rounded-xl text-white mt-0.5">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-400 font-[Manrope]">Мастер</div>
+                                    <div class="text-gray-800 text-base font-[Manrope]" x-text="specialistName"></div>
+                                </div>
                             </div>
-                            <div>
-                                <div class="text-sm text-gray-400  font-[Manrope]">Дата и время</div>
-                                <div class="text-gray-800 text-base font-[Manrope]">
-                                    <span x-text="new Date(selectedDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })"></span>
-                                    в <span x-text="selectedTime"></span>
+
+                            <hr class="border-gray-100">
+
+                            <div class="flex items-start space-x-3">
+                                <div class="p-2 bg-pink-500 rounded-xl text-white mt-0.5">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-400 font-[Manrope]">Дата и время</div>
+                                    <div class="text-gray-800 text-base font-[Manrope]">
+                                        <span x-text="new Date(selectedDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })"></span>
+                                        в <span x-text="selectedTime"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100 mt-4">
+                            <span class="font-normal text-gray-600 font-[Manrope]">Итого к оплате:</span>
+                            <span class="text-2xl text-pink-600 font-[Manrope]" x-text="servicePrice"></span>
+                        </div>
+
+                        <div class="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100 rounded-2xl">
+                            <div class="flex items-start gap-3">
+                                <div>
+                                    <h4 class="text-lg text-gray-800 font-[Manrope]">Зарегистрируйтесь и получите больше возможностей!</h4>
+                                    <ul class="mt-1.5 space-y-1">
+                                        <li class="text-sm text-gray-600 font-[Manrope] flex items-center gap-2">
+                                            <span class="text-pink-500">✓</span> История всех записей в одном месте
+                                        </li>
+                                        <li class="text-sm text-gray-600 font-[Manrope] flex items-center gap-2">
+                                            <span class="text-pink-500">✓</span> Напоминания о предстоящих визитах
+                                        </li>
+                                        <li class="text-sm text-gray-600 font-[Manrope] flex items-center gap-2">
+                                            <span class="text-pink-500">✓</span> Возможность оставить отзыв после услуги
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 space-y-2.5">
+                            @auth
+                                <button @click="
+                                    loading = true;
+                                    fetch('/api/appointments', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    },
+                                    body: JSON.stringify({
+                                        specialist_id: selectedSpecialist,
+                                        service_id: selectedService,
+                                        date: selectedDate,
+                                        time: selectedTime
+                                    })
+                                    })
+                                    .then(async res => {
+                                        const data = await res.json();
+                                        if (!res.ok) {
+                                            console.error('Ошибки валидации от Laravel:', data.errors);
+                                            throw new Error(data.message || 'Ошибка валидации');
+                                        }
+                                        return data;
+                                    })
+                                    .then(data => {
+                                        loading = false;
+                                        alert('Вы успешно записались!');
+                                        $store.modalManager.closeBooking();
+                                        window.location.href = '/dashboard';
+                                    })
+                                    .catch(e => {
+                                        loading = false;
+                                        alert('Ошибка при создании записи: ' + e.message);
+                                    });"
+                                        :disabled="loading"
+                                        class="w-full bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-xl shadow-lg shadow-pink-200 transition-all text-center disabled:opacity-50 font-[Manrope]">
+                                    <span x-show="!loading">Подтвердить запись</span>
+                                    <span x-show="loading">Оформление записи...</span>
+                                </button>
+                            @else
+
+                                <button @click="step = 'guest_form'"
+                                        class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 p-4 rounded-xl transition-all text-center font-[Manrope] border border-gray-200">
+                                    Записаться без аккаунта
+                                </button>
+
+
+                                <a href="{{ route('login') }}"
+                                   class="block w-full bg-pink-500 hover:bg-gray-900 text-white p-4 rounded-xl text-center transition-all font-[Manrope]">
+                                    Войти в аккаунт
+                                </a>
+
+                            @endauth
+                        </div>
                     </div>
 
-                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100 mt-4">
-                        <span class="font-normal text-gray-600 font-[Manrope]">Итого к оплате:</span>
-                        <span class="text-2xl text-pink-600 font-[Manrope]" x-text="servicePrice"></span>
-                    </div>
+                </div>
 
-                    <div class="mt-4">
-                        @auth
+                <!-- Форма для гостя -->
+                <div x-show="step === 'guest_form'"
+                     x-transition:enter="transition ease-in-out duration-300"
+                     x-transition:enter-start="opacity-0 transform scale-95"
+                     x-transition:enter-end="opacity-100 transform scale-100"
+                     x-transition:leave="transition ease-in-out duration-200"
+                     x-transition:leave-start="opacity-100 transform scale-100"
+                     x-transition:leave-end="opacity-0 transform scale-95"
+                     class="absolute inset-x-0 top-24 px-8 pb-8 overflow-y-auto scrollbar-thin scrollbar-thumb-pink-300 scrollbar-track-transparent"
+                     style="top: 80px; max-height: calc(100vh - 160px);">
+                    <div class="max-h-96 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                        <div class="relative flex items-center justify-center mb-5">
+                            <button @click="step = 'final_check'" class="absolute left-0 text-pink-500 hover:underline text-sm font-[Manrope]">Назад</button>
+                            <h1 class="text-xl text-gray-800 font-[Playfair_Display] font-normal">Введите ваши данные</h1>
+                        </div>
+
+                        <div class=" rounded-2xl p-6 space-y-4">
+                            <p class="text-sm text-gray-500 font-[Manrope] text-center mb-2">
+                                Заполните поля для создания записи
+                            </p>
+
+                            <div>
+                                <label class="block text-xs uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">Имя <span class="text-pink-500">*</span></label>
+                                <input type="text"
+                                       x-model="guestName"
+                                       @input="guestNameError = ''"
+                                       placeholder="Введите ваше имя"
+                                       class="w-full rounded-xl border border-[#f1f1f5] bg-[#f8f8fa] focus:border-[#ff5c8a] focus:ring-[#ff5c8a]/20 text-sm p-3 transition-colors duration-200 outline-none"
+                                       :class="guestNameError ? 'border-red-500 focus:border-red-500' : ''">
+                                <p class="text-xs text-red-500 mt-1" x-show="guestNameError" x-text="guestNameError"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">Фамилия</label>
+                                <input type="text"
+                                       x-model="guestLastName"
+                                       placeholder="Введите вашу фамилию"
+                                       class="w-full rounded-xl border border-[#f1f1f5] bg-[#f8f8fa] focus:border-[#ff5c8a] focus:ring-[#ff5c8a]/20 text-sm p-3 transition-colors duration-200 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs uppercase tracking-wider text-[#7c7e8c] font-medium mb-1.5">Номер телефона <span class="text-pink-500">*</span></label>
+                                <input type="tel"
+                                       x-model="guestPhone"
+                                       @input="
+                                       guestPhone = guestPhone.replace(/[^0-9+]/g, '');
+                                       if (guestPhone.length > 0 && !guestPhone.startsWith('+79')) {
+                                           guestPhone = '+79' + guestPhone.replace(/[^0-9]/g, '').slice(0, 9);
+                                       }
+                                       if (guestPhone.length > 12) {
+                                           guestPhone = guestPhone.slice(0, 12);
+                                       }
+                                       guestPhoneError = '';
+                                   "
+                                       placeholder="+7 (999) 000-00-00"
+                                       class="w-full rounded-xl border border-[#f1f1f5] bg-[#f8f8fa] focus:border-[#ff5c8a] focus:ring-[#ff5c8a]/20 text-sm p-3 transition-colors duration-200 outline-none"
+                                       :class="guestPhoneError ? 'border-red-500 focus:border-red-500' : ''">
+                                <p class="text-xs text-red-500 mt-1" x-show="guestPhoneError" x-text="guestPhoneError"></p>
+                                <p class="text-xs text-gray-400 mt-1 font-light">Формат: +79XXXXXXXXX (11 цифр)</p>
+                            </div>
+
+                            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100 mt-2">
+                                <span class="font-normal text-gray-600 font-[Manrope]">Итого к оплате:</span>
+                                <span class="text-2xl text-pink-600 font-[Manrope]" x-text="servicePrice"></span>
+                            </div>
+
                             <button @click="
-                loading = true;
-                fetch('/api/appointments', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        specialist_id: selectedSpecialist,
-                        service_id: selectedService,
-                        date: selectedDate,
-                        time: selectedTime
-                    })
-                })
-                .then(async res => {
-                    const data = await res.json();
-                    if (!res.ok) {
-                        console.error('Ошибки валидации от Laravel:', data.errors);
-                        throw new Error(data.message || 'Ошибка валидации');
-                    }
-                    return data;
-                })
-                .then(data => {
-                    loading = false;
-                    alert('Вы успешно записались!');
-                    $store.modalManager.closeBooking();
-                    window.location.href = '/dashboard';
-                })
-                .catch(e => {
-                    loading = false;
-                    alert('Ошибка при создании записи: ' + e.message);
-                });"
+    let hasError = false;
+
+    if (!guestName || !guestName.trim()) {
+        guestNameError = 'Имя обязательно для заполнения';
+        hasError = true;
+    } else {
+        guestNameError = '';
+    }
+
+    if (!guestPhone || guestPhone.length < 12 || !guestPhone.startsWith('+79')) {
+        guestPhoneError = 'Введите корректный номер телефона (например: +79001234567)';
+        hasError = true;
+    } else {
+        guestPhoneError = '';
+    }
+
+    if (hasError) return;
+
+    loading = true;
+    console.log('Отправляю запрос...');
+    console.log('Данные:', {
+        specialist_id: selectedSpecialist,
+        service_id: selectedService,
+        date: selectedDate,
+        time: selectedTime,
+        guest_name: guestName,
+        guest_last_name: guestLastName,
+        guest_phone: guestPhone
+    });
+
+    fetch('/api/appointments', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            specialist_id: selectedSpecialist,
+            service_id: selectedService,
+            date: selectedDate,
+            time: selectedTime,
+            guest_name: guestName,
+            guest_last_name: guestLastName,
+            guest_phone: guestPhone
+        })
+    })
+    .then(res => {
+        console.log('Статус ответа:', res.status);
+        console.log('Заголовки:', res.headers);
+        return res.json();
+    })
+    .then(data => {
+        console.log('Данные от сервера:', data);
+        if (!data.success) {
+            throw new Error(data.message || 'Ошибка записи');
+        }
+        loading = false;
+        alert('✅ Вы успешно записались! Мы свяжемся с вами для подтверждения.');
+        $store.modalManager.closeBooking();
+    })
+    .catch(e => {
+        loading = false;
+        console.error('Полная ошибка:', e);
+        alert('❌ Ошибка: ыува' + e.message);
+    });
+"
                                     :disabled="loading"
                                     class="w-full bg-pink-500 hover:bg-pink-600 text-white p-4 rounded-xl shadow-lg shadow-pink-200 transition-all text-center disabled:opacity-50 font-[Manrope]">
-                                <span x-show="!loading">Подтвердить запись</span>
+                                <span x-show="!loading">Записаться</span>
                                 <span x-show="loading">Оформление записи...</span>
                             </button>
-                        @else
-                            <div class="space-y-2">
-                                <div class="text-center text-sm text-gray-500 font-[Manrope]">
-                                    Для завершения онлайн-записи необходимо авторизоваться
-                                </div>
-                                <a href="{{ route('login') }}"
-                                   class="block w-full bg-gray-800 hover:bg-gray-900 text-white p-4 rounded-xl text-center transition-all font-[Manrope]">
-                                    Войти в личный кабинет
-                                </a>
-                            </div>
-                        @endauth
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>

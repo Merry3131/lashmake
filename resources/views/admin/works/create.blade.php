@@ -27,7 +27,7 @@
                             <option value="" disabled selected>Выберите специалиста из списка...</option>
                             @foreach($specialists as $specialist)
                                 <option value="{{ $specialist->id }}" {{ old('specialist_id') == $specialist->id ? 'selected' : '' }}>
-                                    {{ $specialist->user->last_name }} {{ $specialist->user->name }} ({{ $specialist->level_id ?? 'Мастер' }})
+                                    {{ $specialist->user->last_name }} {{ $specialist->user->first_name }} ({{ $specialist->level_id ?? 'Мастер' }})
                                 </option>
                             @endforeach
                         </select>

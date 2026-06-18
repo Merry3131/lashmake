@@ -41,6 +41,15 @@ class BookingController extends Controller
         ]);
     }
 
+    public function getSpecialistsByService($serviceId)
+    {
+        $specialists = \App\Models\Specialist::whereHas('service_specialist', function($q) use ($serviceId) {
+            $q->where('service_id', $serviceId);
+        })->with('user')->get();
+
+        return response()->json($specialists);
+    }
+
     public function getSpecialist($id)
     {
         $specialist = Specialist::with('user', 'level')->findOrFail($id);

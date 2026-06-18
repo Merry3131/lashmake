@@ -66,10 +66,10 @@
                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-light text-[#1e1f22] hover:bg-[#fafafc] hover:text-[#ff5c8a] transition-all duration-200">
                         Примеры работ
                     </a>
-{{--                    <a href="#"--}}
-{{--                       class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-light text-[#1e1f22] hover:bg-[#fafafc] hover:text-[#ff5c8a] transition-all duration-200">--}}
-{{--                        Модерация отзывов--}}
-{{--                    </a>--}}
+                    <a href="{{ route('admin.reviews.index') }}"
+                       class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-light text-[#1e1f22] hover:bg-[#fafafc] hover:text-[#ff5c8a] transition-all duration-200">
+                        Модерация отзывов
+                    </a>
                 </div>
             </div>
 

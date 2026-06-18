@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\Specialist;
+use App\Models\User;
 use App\Models\WorkSchedule;
 use App\Models\Service;
 use Carbon\Carbon;
@@ -16,7 +17,7 @@ class WorkScheduleController extends Controller
 {
     public function getAvailableSlots(Request $request)
     {
-        // Обязательно требуем service_id, чтобы узнать длительность услуги
+
         $request->validate([
             'specialist_id' => 'required|exists:specialists,id',
             'service_id'    => 'required|exists:services,id',
@@ -28,14 +29,14 @@ class WorkScheduleController extends Controller
         $date = $request->date;
         $now = Carbon::now('Asia/Yekaterinburg');
 
-        // 1. Получаем расписание мастера
+
         $schedule = WorkSchedule::where('specialist_id', $specID)->whereDate('work_date', $date)->first();
 
         if (!$schedule || $schedule->is_day_off){
             return response()->json([]);
         }
 
-        // 2. Находим мастера и вытаскиваем длительность услуги из level_service
+
         $specialist = Specialist::findOrFail($specID);
 
         $levelService = DB::table('level_service')
@@ -47,10 +48,10 @@ class WorkScheduleController extends Controller
             return response()->json(['error' => 'Тариф для мастера и услуги не найден'], 422);
         }
 
-        // Длительность услуги в минутах (например, 120 или 150)
+
         $durationMinutes = (int) $levelService->duration;
 
-        // 3. Собираем уже занятые визиты на этот день
+
         $bookedSlotsQuery = Appointment::where('specialist_id', $specID)
             ->whereDate('appointment_at', $date)
             ->whereIn('status', ['pending', 'confirmed']);
@@ -59,18 +60,18 @@ class WorkScheduleController extends Controller
             $bookedSlotsQuery->where('id', '!=', $request->ignore_appointment_id);
         }
 
-        // Получаем занятые интервалы в виде объектов Carbon (чтобы удобно сравнивать)
+
         $appointments = $bookedSlotsQuery->get(['appointment_at', 'service_id'])
             ->map(function($app) use ($specialist) {
                 $startTime = Carbon::parse($app->appointment_at);
 
-                // Нам нужно знать, сколько длится уже занятая услуга, чтобы построить её конец
+
                 $appLevelService = DB::table('level_service')
                     ->where('service_id', $app->service_id)
                     ->where('level_id', $specialist->level_id)
                     ->first();
 
-                $appDuration = $appLevelService ? (int)$appLevelService->duration : 60; // дефолт 60 мин, если не нашли
+                $appDuration = $appLevelService ? (int)$appLevelService->duration : 60;
                 $endTime = (clone $startTime)->addMinutes($appDuration);
 
                 return [
@@ -79,65 +80,59 @@ class WorkScheduleController extends Controller
                 ];
             });
 
-        // 4. Генерируем потенциальные слоты (шаг начала записи оставляем 30 минут)
+
         $slots = [];
 
-        // Переводим границы дня в объекты Carbon для точного сравнения
+
         $dayStart = Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . $schedule->start_time);
         $dayEnd = Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . $schedule->end_time);
         $dayBreakStart = Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . $schedule->break_start);
         $dayBreakEnd = Carbon::createFromFormat('Y-m-d H:i:s', $date . ' ' . $schedule->break_end);
 
-        // Начинаем проверку с самого начала рабочего дня мастера
+
         $currentPointer = clone $dayStart;
 
-        // Крутим цикл, пока маркер времени не дошел до конца рабочего дня
+
         while ($currentPointer < $dayEnd) {
 
-            // Время гипотетического окончания процедуры
+
             $slotStart = clone $currentPointer;
             $slotEnd = (clone $slotStart)->addMinutes($durationMinutes);
 
-            // А: Если проверяем сегодняшний день, нельзя предлагать время, которое уже прошло
-            // А: Если проверяем сегодняшний день, нельзя предлагать время, которое уже прошло
+
             if ($date == $now->toDateString()) {
-                // Создаем объект текущего времени в формате "H:i" для простого сравнения строк
-                // или сравниваем напрямую объекты Carbon с учетом правильной таймзоны
                 if ($slotStart->timezone('Europe/Moscow') <= $now) {
                     $currentPointer->addMinutes(30);
                     continue;
                 }
             }
 
-            // Б: Проверка, что процедура целиком влезает до конца рабочего дня
+
             if ($slotEnd > $dayEnd) {
-                break; // Если не влезает до закрытия салона — дальше искать нет смысла
+                break;
             }
 
-            // В: Проверка на пересечение с обеденным перерывом
-            // Сеанс пересекается с обедом, если начинается раньше конца обеда И заканчивается позже начала обеда
             if ($slotStart < $dayBreakEnd && $slotEnd > $dayBreakStart) {
-                // Важно! Вместо того чтобы ломать всё, мы просто переносим начало записи на конец обеда
+
                 $currentPointer = clone $dayBreakEnd;
                 continue;
             }
 
-            // Г: Проверка на пересечение с уже существующими записями других клиентов
+
             $isIntersected = false;
             foreach ($appointments as $booked) {
                 if ($slotStart < $booked['end'] && $slotEnd > $booked['start']) {
                     $isIntersected = true;
-                    // Если наткнулись на чужую запись, переносим наш маркер на время окончания этой записи
                     $currentPointer = clone $booked['end'];
                     break;
                 }
             }
 
-            // Если все проверки пройдены удачно — это наш честный слот!
+
             if (!$isIntersected) {
                 $slots[] = $slotStart->format('H:i');
 
-                // Шагаем маркером СТРОГО на длительность выполненной услуги (например, на 2 часа вперед)
+
                 $currentPointer = clone $slotEnd;
             }
         }
@@ -148,15 +143,46 @@ class WorkScheduleController extends Controller
     // создание новой записи на услугу
     public function store(Request $request)
     {
-        // 1. Проверяем, авторизован ли пользователь (на всякий случай)
-        if (!Auth::check()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Пользователь не авторизован.'
-            ], 401);
+        // Проверяем, есть ли guest данные
+        $isGuest = $request->has('guest_name') && $request->has('guest_phone');
+
+        // Если это не гость - проверяем авторизацию
+        if (!$isGuest) {
+            if (!Auth::check() && !Auth::guard('sanctum')->check()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Пользователь не авторизован.'
+                ], 401);
+            }
+            $clientId = Auth::id() ?? Auth::guard('sanctum')->id();
+            $isAuth = true;
+        } else {
+            // Гость - валидируем данные
+            $request->validate([
+                'guest_name' => 'required|string|max:255',
+                'guest_last_name' => 'nullable|string|max:255',
+                'guest_phone' => 'required|string|max:20|min:10',
+            ]);
+
+            // Ищем или создаем пользователя
+            $user = User::where('phone', $request->guest_phone)->first();
+
+            if (!$user) {
+                $user = User::create([
+                    'first_name' => $request->guest_name,
+                    'last_name' => $request->guest_last_name ?? '',
+                    'phone' => $request->guest_phone,
+                    'email' => null,
+                    'password' => null,
+                    'role' => 'client',
+                ]);
+            }
+
+            $clientId = $user->id;
+            $isAuth = false;
         }
 
-        // 2. Валидация входящих данных
+        // Общая валидация для всех
         $validated = $request->validate([
             'specialist_id' => 'required|exists:specialists,id',
             'service_id'    => 'required|exists:services,id',
@@ -164,19 +190,16 @@ class WorkScheduleController extends Controller
             'time'          => 'required|string',
         ]);
 
+        // Проверка: мастер не может записаться к себе (только для авторизованных)
         $targetSpecialist = Specialist::find($validated['specialist_id']);
-
-        // Сравниваем ID текущего юзера с user_id выбранного мастера
-        if ($targetSpecialist && Auth::id() == $targetSpecialist->user_id) {
+        if ($isAuth && $targetSpecialist && Auth::id() == $targetSpecialist->user_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Вы не можете записаться на услугу к самому себе.'
-            ], 422); // 422 Unprocessable Entity — идеальный статус для бизнес-логики
+            ], 422);
         }
 
         try {
-            // 3. Безопасное склеивание даты и времени через специальный метод Carbon
-            // Из "2026-05-20" и "14:30" создаем полноценный объект даты-времени
             $appointmentAt = Carbon::createFromFormat('Y-m-d H:i', $validated['date'] . ' ' . $validated['time']);
 
             if (!$appointmentAt) {
@@ -186,10 +209,8 @@ class WorkScheduleController extends Controller
                 ], 422);
             }
 
-            // 2. Находим мастера, чтобы узнать его категорию (level_id)
             $specialist = Specialist::findOrFail($request->specialist_id);
 
-            // 3. КРИТИЧЕСКИЙ ШАГ: Ищем правильную цену в сводной таблице level_service
             $levelService = DB::table('level_service')
                 ->where('service_id', $request->service_id)
                 ->where('level_id', $specialist->level_id)
@@ -202,7 +223,7 @@ class WorkScheduleController extends Controller
                 ], 422);
             }
 
-            // 5. Проверяем, не занято ли это время у мастера (учитываем статус cancelled)
+            // Проверка на занятое время
             $isTimeOccupied = Appointment::where('specialist_id', $validated['specialist_id'])
                 ->where('appointment_at', $appointmentAt)
                 ->where('status', '!=', 'cancelled')
@@ -215,19 +236,22 @@ class WorkScheduleController extends Controller
                 ], 422);
             }
 
-            // 6. Запись в базу данных
+            // Создаем запись
             $appointment = Appointment::create([
-                'client_id'      => Auth::id(), // Записываем ID текущего пользователя
+                'client_id'      => $clientId,
                 'specialist_id'  => $validated['specialist_id'],
                 'service_id'     => $validated['service_id'],
                 'appointment_at' => $appointmentAt,
-                'final_price'    => $levelService->price, // Обязательное поле для БД
+                'final_price'    => $levelService->price,
                 'status'         => 'pending'
             ]);
 
-            $user = Auth::user();
-            if ($user) {
-                $user->notify(new \App\Notifications\AppointmentNotification($appointment, 'created'));
+            // Отправляем уведомление только авторизованным пользователям
+            if ($isAuth) {
+                $user = Auth::user();
+                if ($user) {
+                    $user->notify(new \App\Notifications\AppointmentNotification($appointment, 'created'));
+                }
             }
 
             return response()->json([
@@ -237,7 +261,6 @@ class WorkScheduleController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            // Это запишет детальный текст ошибки (какой именно файл или строка упали) в файл storage/logs/laravel.log
             \Log::error('Критическая ошибка при создании записи: ' . $e->getMessage() . ' в файле ' . $e->getFile() . ' на строке ' . $e->getLine());
 
             return response()->json([

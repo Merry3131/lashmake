@@ -29,13 +29,13 @@ class AppointmentNotification extends Notification implements ShouldQueue
 
     public function toArray(object $notifiable): array
     {
-        // Жадная загрузка связей, чтобы не было ошибок пустого объекта
+
         $this->appointment->load(['service', 'specialist.user']);
 
         $serviceName = mb_strtolower($this->appointment->service->name ?? 'услугу');
         $masterName = $this->appointment->specialist->user->first_name ?? 'мастеру';
 
-        // Безопасное получение даты и времени через Carbon
+
         $datetime = Carbon::parse($this->appointment->appointment_at);
         $date = $datetime->format('d.m.Y');
         $time = $datetime->format('H:i');

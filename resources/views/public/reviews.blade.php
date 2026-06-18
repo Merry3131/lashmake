@@ -76,9 +76,9 @@
                     </span>
                         </div>
 
-                        <div class="flex text-amber-400 text-xs gap-0.5">
+                        <div class="flex items-center gap-0.5 justify-center">
                             @for($i = 1; $i <= 5; $i++)
-                                <i class="fas fa-star {{ $i <= $review->rating ? 'text-amber-400' : 'text-gray-200' }}"></i>
+                                <span class="text-sm {{ $i <= $review->rating ? 'text-amber-400' : 'text-gray-400' }}">★</span>
                             @endfor
                         </div>
                     </div>

@@ -24,3 +24,5 @@ Route::get('/specialist/{specialist}/services', function ($specialistId) {
     $specialist = \App\Models\Specialist::with('service_specialist')->findOrFail($specialistId);
     return response()->json($specialist->service_specialist);
 });
+
+Route::get('/service/{service}/specialists', [BookingController::class, 'getSpecialistsByService']);

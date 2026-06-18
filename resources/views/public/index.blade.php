@@ -24,7 +24,7 @@
 
         <section class="max-w-7xl mx-auto pt-20 pb-24 md:pt-28 md:pb-36 px-6 flex flex-col md:flex-row items-center justify-between gap-12 relative overflow-hidden">
 
-            <div class="relative z-10 w-full md:w-1/2 flex justify-center md:justify-start">
+            <div class="relative z-10 w-full md:w-1/2 flex justify-center md:justify-start hidden md:flex">
                 <div class="w-full max-w-sm md:max-w-md aspect-[3/4] overflow-hidden relative group rounded-2xl shadow-xl">
                     <div class="absolute -bottom-4 -left-4 w-full h-full border-2 border-[#bd0055]/20 rounded-2xl -z-10 pointer-events-none transition-transform duration-500 group-hover:-translate-x-1 group-hover:translate-y-1"></div>
 
@@ -43,13 +43,13 @@
                 <h1 class="text-2xl md:text-4xl text-gray-900">
                     Искусство быть собой
                 </h1>
-                <p class="mt-6 text-gray-600 text-sm md:text-base tracking-wide leading-relaxed font-light max-w-md">
+                <p class="mt-6 text-gray-600 text-sm md:text-base tracking-wide leading-relaxed font-light max-w-md mx-auto md:mx-0">
                     Высокое качество материалов и профессионализм мастеров для вашей уверенности и естественной красоты
                 </p>
 
-                <div class="mt-10 relative z-20 flex justify-between w-full">
+                <div class="mt-10 relative z-20 flex justify-center w-full md:justify-start">
                     <button x-data @click="$store.modalManager.openBooking()"
-                            class="group relative border border-pink-500 text-pink-600 px-12 py-3.5 rounded-full text-sm font-light tracking-wide shadow-sm transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-500 overflow-hidden bg-transparent hover:text-white  hover:shadow-lg hover:shadow-pink-900/20">
+                            class="group relative border border-pink-500 text-pink-600 px-12 py-3.5 rounded-full text-sm font-light tracking-wide shadow-sm transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-500 overflow-hidden bg-transparent hover:text-white hover:shadow-lg hover:shadow-pink-900/20">
                         <span class="absolute inset-0 bg-pink-500 scale-x-0 group-hover:scale-x-100 group-hover:bg-pink-500 origin-left transition-transform duration-500 ease-out pointer-events-none"></span>
                         <span class="relative z-10">Записаться онлайн</span>
                     </button>
@@ -136,13 +136,13 @@
 
         startIndex: 0,
 
-
         get itemsToShow() {
-            return window.innerWidth < 640 ? 1 : 3;
+            if (window.innerWidth < 640) return 1;
+            if (window.innerWidth < 1024) return 2;
+            return 3;
         },
 
         next() {
-
             if (this.startIndex + this.itemsToShow < this.images.length) {
                 this.startIndex++;
             } else {
@@ -151,7 +151,6 @@
         },
 
         prev() {
-
             if (this.startIndex > 0) {
                 this.startIndex--;
             } else {
@@ -168,17 +167,17 @@
                 </h2>
                 <div class="flex gap-2">
                     <button @click="prev()"
-                            class="w-10 h-10 border border-gray-300 flex items-center justify-center text-pink-500  hover:text-pink-500 hover:border-pink-500 rounded-xl transition-all duration-200">
+                            class="w-10 h-10 border border-gray-300 flex items-center justify-center text-pink-500 hover:text-pink-500 hover:border-pink-500 rounded-xl transition-all duration-200">
                         &#8592;
                     </button>
                     <button @click="next()"
-                            class="w-10 h-10 border border-gray-300 flex items-center justify-center text-pink-500  hover:text-pink-500 hover:border-pink-500 rounded-xl transition-all duration-200">
+                            class="w-10 h-10 border border-gray-300 flex items-center justify-center text-pink-500 hover:text-pink-500 hover:border-pink-500 rounded-xl transition-all duration-200">
                         &#8594;
                     </button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 overflow-hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-hidden">
 
                 <template x-for="(image, index) in images" :key="image">
                     <div x-show="index >= startIndex && index < (startIndex + itemsToShow)"
@@ -197,33 +196,33 @@
         </section>
     </div>
 
-    <div class="bg-[#f5f2ed] py-24">
-        <section class="max-w-7xl mx-auto px-6">
-            <h2 class="text-3xl font-serif text-center text-gray-900 tracking-wide mb-16">
+    <div class="bg-[#f5f2ed] py-12 sm:py-16 md:py-24">
+        <section class="max-w-7xl mx-auto px-4 sm:px-6">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-serif text-center text-gray-900 tracking-wide mb-10 sm:mb-12 md:mb-16">
                 Наши специалисты
             </h2>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 @foreach($specialists->take(4) as $specialist)
-                    <div class="text-center group">
-                        <div class="aspect-[3/4] bg-gray-300 mb-4 overflow-hidden transition-transform duration-300 group-hover:shadow-md">
+                    <div class="text-center group max-w-[400px] mx-auto w-full sm:max-w-none">
+                        <div class="aspect-[3/4] bg-gray-300 mb-2 sm:mb-3 md:mb-4 overflow-hidden transition-transform duration-300 group-hover:shadow-md rounded-lg md:rounded-none">
                             @if($specialist->hasMedia('specialists'))
                                 <img src="{{ $specialist->getFirstMediaUrl('specialists') }}"
                                      class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500">
                             @endif
                         </div>
-                        <h4 class=" text-sm md:text-base text-gray-900">
+                        <h4 class="text-sm sm:text-md md:text-base lg:text-lg text-gray-900 font-medium">
                             {{ $specialist->user->first_name }} {{ $specialist->user->last_name }}
                         </h4>
-                        <p class="text-xs text-gray-400 mt-1 font-light">
+                        <p class="text-sm sm:text-xs md:text-sm text-gray-400 mt-1 font-light line-clamp-2 md:line-clamp-none px-1">
                             {{ $specialist->bio }}
                         </p>
                     </div>
                 @endforeach
             </div>
 
-            <div class="mt-12 text-center">
-                <a href="/team" class="inline-block border border-gray-900 text-gray-700 px-8 py-3 rounded-full text-xs uppercase tracking-widest  hover:text-pink-500 hover:border-pink-500 transition-all duration-300">
+            <div class="mt-10 sm:mt-12 md:mt-14 text-center">
+                <a href="/team" class="inline-block border border-gray-900 text-gray-700 px-5 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-full text-sm sm:text-xs md:text-sm uppercase tracking-widest hover:text-pink-500 hover:border-pink-500 transition-all duration-300">
                     Показать всех
                 </a>
             </div>
@@ -241,9 +240,9 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 @foreach($works->take(4) as $work)
-                    <div class="aspect-square bg-gray-100 relative shadow-sm overflow-hidden rounded-xl group">
+                    <div class="aspect-square bg-gray-100 relative shadow-sm overflow-hidden rounded-xl group max-w-[400px] mx-auto w-full sm:max-w-none">
                         @if($work->hasMedia('works'))
                             <img src="{{ $work->getFirstMediaUrl('works') }}"
                                  class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"

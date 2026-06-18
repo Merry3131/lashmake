@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Auth;
 class ReviewController extends Controller
 {
     public function index(){
-        $reviews = Review::with(['user', 'specialist.user', 'appointment.service'])->latest()->get();
+        $reviews = Review::where('is_approved', 1)->with(['user', 'specialist.user', 'appointment.service'])->latest()->get();
+
 
         return view('public.reviews', compact('reviews'));
     }

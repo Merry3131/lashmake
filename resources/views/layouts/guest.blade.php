@@ -7,7 +7,6 @@
 
     <title>{{ config('app.name', 'Центр Ресниц') }}</title>
 
-    {{-- Подключаем наш фирменный шрифт Rubik --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500&display=swap" rel="stylesheet">
@@ -15,10 +14,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-['Rubik'] text-[#1e1f22] antialiased bg-gray-100">
-{{-- Изменено: pt-20 sm:pt-32 вместо sm:justify-center зафиксирует положение карточки по вертикали --}}
+
 <div class="min-h-screen flex flex-col items-center pt-20 sm:pt-32 px-4">
 
-    {{-- Карточка формы: теперь высота строго зафиксирована на h-[620px] для идеального совпадения --}}
     <div class="w-full sm:max-w-md p-8 bg-white border border-[#f1f1f5] rounded-3xl shadow-sm overflow-hidden h-[620px] flex flex-col justify-between">
         <div class="flex flex-col h-full">
             {{ $slot }}

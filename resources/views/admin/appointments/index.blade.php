@@ -92,7 +92,7 @@
                             </td>
 
                             <td class="px-6 py-4.5 text-right space-x-1.5 pr-8 whitespace-nowrap">
-                                <a href="{{ route('admin.appointments.edit', $appointment->id) }}" class="inline-flex items-center justify-center px-3 py-2 border border-[#f1f1f5] bg-white hover:bg-[#f8f8fa] text-[#1e1f22] text-xs font-light rounded-xl transition-all duration-200 shadow-sm">
+                                <a href="{{ route('admin.appointments.edit', [$appointment->id, ]) }}" class="inline-flex items-center justify-center px-3 py-2 border border-[#f1f1f5] bg-white hover:bg-[#f8f8fa] text-[#1e1f22] text-xs font-light rounded-xl transition-all duration-200 shadow-sm">
                                     Изменить
                                 </a>
 

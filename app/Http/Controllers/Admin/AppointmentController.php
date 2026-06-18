@@ -114,8 +114,11 @@ class AppointmentController extends Controller
         $specialists = \App\Models\Specialist::with('user', 'service_specialist')->get()
             ->sortBy(fn($s) => $s->user->last_name ?? '')
             ->values();
+        $services = \App\Models\Service::all();
 
-        return view('admin.appointments.edit', compact('appointment', 'specialists'));
+
+
+        return view('admin.appointments.edit', compact('appointment', 'specialists', 'services'));
     }
 
     public function update(Request $request, Appointment $appointment)

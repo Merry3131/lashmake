@@ -12,4 +12,9 @@ class ExamplesOfWorkController extends Controller
         return view('public.example_of_works', compact('works'));
     }
 
+    public function show(Works $works)
+    {
+        return view('public.work-show', compact('works'));
+    }
+
 }

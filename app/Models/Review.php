@@ -12,6 +12,7 @@ class Review extends Model
         'specialist_id',
         'rating',
         'comment',
+        'is_approved',
     ];
     //связь с таблицей Пользователи
     public function user(){

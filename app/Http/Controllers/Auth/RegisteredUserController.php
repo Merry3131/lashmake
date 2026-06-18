@@ -37,6 +37,18 @@ class RegisteredUserController extends Controller
             'phone' => ['required', 'string', 'max:20'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+
+            [
+                'first_name.required' => 'Имя обязательно для заполнения',
+                'last_name.required' => 'Фамилия обязательна для заполнения',
+                'phone.required' => 'Телефон обязателен для заполнения',
+                'email.required' => 'Email обязателен для заполнения',
+                'email.email' => 'Введите корректный email адрес',
+                'email.unique' => 'Этот email уже зарегистрирован в системе',
+                'password.required' => 'Пароль обязателен для заполнения',
+                'password.confirmed' => 'Пароли не совпадают',
+                'password.min' => 'Пароль должен содержать минимум :min символов',
+            ],
         ]);
 
 
