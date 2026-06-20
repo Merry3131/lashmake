@@ -140,13 +140,13 @@ class WorkScheduleController extends Controller
         return response()->json($slots);
     }
 
-    // создание новой записи на услугу
+
     public function store(Request $request)
     {
-        // Проверяем, есть ли guest данные
+
         $isGuest = $request->has('guest_name') && $request->has('guest_phone');
 
-        // Если это не гость - проверяем авторизацию
+
         if (!$isGuest) {
             if (!Auth::check() && !Auth::guard('sanctum')->check()) {
                 return response()->json([
@@ -157,7 +157,7 @@ class WorkScheduleController extends Controller
             $clientId = Auth::id() ?? Auth::guard('sanctum')->id();
             $isAuth = true;
         } else {
-            // Гость - валидируем данные
+
             $request->validate([
                 'guest_name' => 'required|string|max:255',
                 'guest_last_name' => 'nullable|string|max:255',
@@ -182,7 +182,6 @@ class WorkScheduleController extends Controller
             $isAuth = false;
         }
 
-        // Общая валидация для всех
         $validated = $request->validate([
             'specialist_id' => 'required|exists:specialists,id',
             'service_id'    => 'required|exists:services,id',
@@ -190,7 +189,6 @@ class WorkScheduleController extends Controller
             'time'          => 'required|string',
         ]);
 
-        // Проверка: мастер не может записаться к себе (только для авторизованных)
         $targetSpecialist = Specialist::find($validated['specialist_id']);
         if ($isAuth && $targetSpecialist && Auth::id() == $targetSpecialist->user_id) {
             return response()->json([
@@ -223,7 +221,6 @@ class WorkScheduleController extends Controller
                 ], 422);
             }
 
-            // Проверка на занятое время
             $isTimeOccupied = Appointment::where('specialist_id', $validated['specialist_id'])
                 ->where('appointment_at', $appointmentAt)
                 ->where('status', '!=', 'cancelled')
@@ -236,7 +233,7 @@ class WorkScheduleController extends Controller
                 ], 422);
             }
 
-            // Создаем запись
+
             $appointment = Appointment::create([
                 'client_id'      => $clientId,
                 'specialist_id'  => $validated['specialist_id'],
@@ -246,7 +243,7 @@ class WorkScheduleController extends Controller
                 'status'         => 'pending'
             ]);
 
-            // Отправляем уведомление только авторизованным пользователям
+
             if ($isAuth) {
                 $user = Auth::user();
                 if ($user) {

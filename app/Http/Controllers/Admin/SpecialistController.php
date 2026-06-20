@@ -11,34 +11,28 @@ use Illuminate\Http\Request;
 
 class SpecialistController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        // Все мастера
         $specialists = Specialist::with('user')->get()->sortBy(fn ($specialist) => $specialist->user->last_name ?? '')->values();
-        // передаем в blade шаблон
         return view('admin.specialists.index', compact('specialists'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(Request $request)
     {
         $query = User::query();
 
-        //поиск
-        if($request->filled('search')){
+        if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where(function($q) use ($search){
-                $q->where('first_name', 'LIKE', "%{$search}%")->orWhere('last_name', 'LIKE', "%{$search}%")->orWhere('phone', 'LIKE', "%{$search}%")->orWhere('email', 'LIKE', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'LIKE', "%{$search}%")
+                    ->orWhere('last_name', 'LIKE', "%{$search}%")
+                    ->orWhere('phone', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%");
             });
         }
 
-        $existingtSpecialists = Specialist::pluck('user_id', 'id')->toArray();
-        $users = $query->WhereNotIn('id', $existingtSpecialists)->paginate(15)->withQueryString();
+        $existingSpecialists = Specialist::pluck('user_id')->toArray();
+        $users = $query->whereNotIn('id', $existingSpecialists)->paginate(15)->withQueryString();
 
         return view('admin.specialists.select_user', compact('users'));
     }
@@ -55,52 +49,50 @@ class SpecialistController extends Controller
         return view('admin.specialists.create', compact('user', 'levels', 'services'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id|unique:specialists,user_id',
-            'level_id' => 'required|exists:levels,id',
+            'user_id'    => 'required|exists:users,id|unique:specialists,user_id',
+            'level_id'   => 'required|exists:levels,id',
             'experience' => 'nullable|string|max:255',
-            'bio' => 'nullable|string',
-            'services' => 'nullable|array',
+            'bio'        => 'nullable|string',
+            'services'   => 'nullable|array',
             'services.*' => 'exists:services,id',
+            'photo'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ], [
-            'user_id.required' => 'Выберите пользователя, который станет специалистом.',
-            'user_id.exists' => 'Выбранный пользователь не найден в системе.',
-            'user_id.unique' => 'Этот пользователь уже является специалистом салона.',
+            'user_id.required'  => 'Выберите пользователя, который станет специалистом.',
+            'user_id.exists'    => 'Выбранный пользователь не найден в системе.',
+            'user_id.unique'    => 'Этот пользователь уже является специалистом салона.',
             'level_id.required' => 'Выберите уровень квалификации мастера.',
+            'photo.image'       => 'Загрузите изображение в формате JPEG, PNG, JPG, GIF или SVG.',
+            'photo.max'         => 'Размер фото не должен превышать 2 МБ.',
         ]);
 
         $specialist = Specialist::create([
-            'user_id' => $validated['user_id'],
-            'level_id' => $validated['level_id'],
+            'user_id'    => $validated['user_id'],
+            'level_id'   => $validated['level_id'],
             'experience' => $validated['experience'] ?? null,
-            'bio' => $validated['bio'] ?? null,
+            'bio'        => $validated['bio'] ?? null,
         ]);
-
 
         if (!empty($validated['services'])) {
             $specialist->service_specialist()->sync($validated['services']);
+        }
+
+        // Сохранение фото в коллекцию 'specialists'
+        if ($request->hasFile('photo')) {
+            $specialist->addMedia($request->file('photo'))->toMediaCollection('specialists');
         }
 
         return redirect()->route('admin.specialists.index')
             ->with('success', 'Специалист успешно добавлен.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Specialist $specialist)
     {
         $levels = Level::select('id', 'name')->get();
@@ -110,38 +102,48 @@ class SpecialistController extends Controller
         return view('admin.specialists.edit', compact('specialist', 'levels', 'services', 'assignedServices'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Specialist $specialist)
     {
         $validated = $request->validate([
-            'level_id' => ['required', 'integer', 'exists:levels,id'],
+            'level_id'   => ['required', 'integer', 'exists:levels,id'],
             'experience' => ['nullable', 'string', 'max:255'],
-            'bio' => ['nullable', 'string'],
-            'services' => ['nullable', 'array'],
+            'bio'        => ['nullable', 'string'],
+            'services'   => ['nullable', 'array'],
             'services.*' => ['exists:services,id'],
+            'photo'      => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ], [
             'level_id.required' => 'Выберите уровень квалификации мастера.',
-            'level_id.exists' => 'Выбранный уровень не существует в системе.',
-            'experience.max' => 'Поле "Опыт работы" не должно превышать 255 символов.',
+            'level_id.exists'   => 'Выбранный уровень не существует в системе.',
+            'experience.max'    => 'Поле "Опыт работы" не должно превышать 255 символов.',
+            'photo.image'       => 'Загрузите изображение в формате JPEG, PNG, JPG, GIF или SVG.',
+            'photo.max'         => 'Размер фото не должен превышать 2 МБ.',
         ]);
 
-        $specialist->update($validated);
+        $specialist->update([
+            'level_id'   => $validated['level_id'],
+            'experience' => $validated['experience'] ?? null,
+            'bio'        => $validated['bio'] ?? null,
+        ]);
 
-        // Синхронизация услуг через связь service_specialist
+        // Синхронизация услуг
         $specialist->service_specialist()->sync($request->services ?? []);
+
+        // Добавляем новое фото в коллекцию 'specialists' (без удаления старого)
+        if ($request->hasFile('photo')) {
+            $specialist->addMedia($request->file('photo'))->toMediaCollection('specialists');
+        }
 
         return redirect()->route('admin.specialists.index')
             ->with('success', 'Данные мастера успешно обновлены.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Specialist $specialist)
     {
+        // Удаляем связанные медиа из коллекции 'specialists'
+        $specialist->clearMediaCollection('specialists');
         $specialist->delete();
-        return redirect()->route('admin.specialists.index')->with('success', 'Специалист успешно удален.');
+
+        return redirect()->route('admin.specialists.index')
+            ->with('success', 'Специалист успешно удален.');
     }
 }

@@ -15,7 +15,6 @@ class ExampleOfWorkController extends Controller
      */
     public function index()
     {
-        // Ленивая загрузка связей и медиафайлов для оптимизации запросов
         $works = Works::with(['specialist.user', 'service', 'media'])->latest()->get();
         return view('admin.works.index', compact('works'));
     }
@@ -44,7 +43,6 @@ class ExampleOfWorkController extends Controller
 
         $work = Works::create($validated);
 
-        // Добавляем изображение в коллекцию 'images' библиотеки Spatie
         if ($request->hasFile('image')) {
             $work->addMediaFromRequest('image')
                 ->toMediaCollection('works');
@@ -82,9 +80,8 @@ class ExampleOfWorkController extends Controller
 
         $work->update($validated);
 
-        // Если загружено новое изображение, старое в коллекции 'images' автоматически заменится
+
         if ($request->hasFile('image')) {
-            // Очищаем прошлую коллекцию картинок (если Spatie настроен на одиночный файл)
             $work->clearMediaCollection('works')->addMediaFromRequest('image')
                 ->toMediaCollection('works');
         }

@@ -20,13 +20,14 @@
         <main class="w-full">
             <div class="w-full bg-white p-6 md:p-8 rounded-3xl border border-[#f1f1f5] shadow-sm text-left">
 
-                <form action="{{ route('admin.specialists.store') }}" method="POST" class="space-y-6">
+                <form action="{{ route('admin.specialists.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                     @csrf
 
                     <input type="hidden" name="user_id" value="{{ $user->id }}">
 
                     <div class="flex flex-col gap-6 w-full">
 
+                        {{-- Уровень квалификации --}}
                         <div class="w-full">
                             <label for="level_id" class="block text-xs tracking-wider text-[#7c7e8c] mb-1.5">
                                 Уровень квалификации
@@ -47,6 +48,7 @@
                             @enderror
                         </div>
 
+                        {{-- Опыт работы --}}
                         <div class="w-full">
                             <label for="experience" class="block text-xs tracking-wider text-[#7c7e8c] mb-1.5">
                                 Опыт работы (текст для отображения)
@@ -63,6 +65,7 @@
                             @enderror
                         </div>
 
+                        {{-- Услуги мастера --}}
                         <div class="w-full">
                             <label class="block text-xs tracking-wider text-[#7c7e8c] mb-1.5">
                                 Услуги мастера
@@ -84,6 +87,7 @@
                             @enderror
                         </div>
 
+                        {{-- Биография --}}
                         <div class="w-full">
                             <label for="bio" class="block text-xs tracking-wider text-[#7c7e8c] mb-1.5">
                                 О себе / Биография мастера
@@ -94,6 +98,25 @@
                                       placeholder="Расскажите об особенностях работы мастера, сильных сторонах, техниках и дипломах..."
                                       class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all resize-y">{{ old('bio') }}</textarea>
                             @error('bio')
+                            <p class="text-xs text-rose-500 mt-1.5">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Фото мастера (новое поле) --}}
+                        <div class="w-full">
+                            <label for="photo" class="block text-xs tracking-wider text-[#7c7e8c] mb-1.5">
+                                Фото мастера
+                            </label>
+                            <input type="file"
+                                   id="photo"
+                                   name="photo"
+                                   accept="image/*"
+                                   onchange="previewImage(event)"
+                                   class="w-full px-4 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100 focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all" />
+                            <div id="photo-preview" class="mt-2 hidden">
+                                <img id="preview-img" src="#" alt="Предпросмотр фото" class="max-w-[200px] max-h-[200px] rounded-xl border border-slate-200 shadow-sm" />
+                            </div>
+                            @error('photo')
                             <p class="text-xs text-rose-500 mt-1.5">{{ $message }}</p>
                             @enderror
                         </div>
@@ -115,4 +138,17 @@
             </div>
         </main>
     </div>
+
+    <script>
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const preview = document.getElementById('photo-preview');
+                const img = document.getElementById('preview-img');
+                img.src = reader.result;
+                preview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
 @endsection

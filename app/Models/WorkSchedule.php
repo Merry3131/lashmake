@@ -22,7 +22,7 @@ class WorkSchedule extends Model
         'is_day_off' => 'boolean',
     ];
 
-     //Получить специалиста, которому принадлежит этот график.
+
     public function specialist()
     {
         return $this->belongsTo(Specialist::class);

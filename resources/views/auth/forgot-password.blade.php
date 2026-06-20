@@ -1,4 +1,4 @@
-<x-guest-layout>
+    <x-guest-layout>
     <div class="flex flex-col h-full justify-between">
         <div>
             <div class="text-center mb-8 pt-4">

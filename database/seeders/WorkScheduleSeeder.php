@@ -11,7 +11,7 @@ class WorkScheduleSeeder extends Seeder
 {
     public function run(): void
     {
-        // Чистим таблицу перед заполнением
+
         DB::table('work_schedules')->delete();
 
         $specialists = Specialist::all();
@@ -23,18 +23,11 @@ class WorkScheduleSeeder extends Seeder
         $data = [];
         $startDate = Carbon::today();
 
-        // Генерируем график на 30 дней
+
         for ($i = 0; $i < 30; $i++) {
             $currentDate = (clone $startDate)->addDays($i);
 
             foreach ($specialists as $index => $specialist) {
-                /* ЛОГИКА:
-                   - Мастера с четным порядковым номером (0, 2...) будут в первой группе.
-                   - Мастера с нечетным (1, 3...) во второй.
-
-                   Для первой группы рабочий день, если ($i % 4) это 0 или 1.
-                   Для второй группы рабочий день, если ($i % 4) это 2 или 3.
-                */
 
                 $isFirstGroup = ($index % 2 === 0);
                 $dayInCycle = $i % 4;

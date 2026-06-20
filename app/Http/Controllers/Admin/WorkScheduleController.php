@@ -19,7 +19,7 @@ class WorkScheduleController extends Controller
         $startOfWeek = $targetDate->copy()->startOfWeek();
         $endOfWeek = $targetDate->copy()->endOfWeek();
 
-        // Загружаем мастеров вместе с их графиком на выбранную неделю
+
         $specialists = Specialist::with(['user', 'service_specialist'])->get();
 
         $schedules = WorkSchedule::whereBetween('work_date', [$startOfWeek, $endOfWeek])
@@ -28,7 +28,7 @@ class WorkScheduleController extends Controller
                 return $item->work_date->format('Y-m-d');
             }]);
 
-        // Генерируем массив дней недели для построения таблицы
+
         $weekDays = [];
         for ($i = 0; $i < 7; $i++) {
             $weekDays[] = $startOfWeek->copy()->addDays($i);
@@ -52,20 +52,16 @@ class WorkScheduleController extends Controller
             'date' => 'required|date_format:Y-m-d'
         ]);
 
-        // Создаем пустой экземпляр модели в памяти (НЕ сохраняя в БД)
         $schedule = new WorkSchedule();
         $schedule->specialist_id = $request->input('specialist_id');
         $schedule->work_date = \Carbon\Carbon::parse($request->input('date'));
 
-        // Ставим дефолтные значения для нового дня
         $schedule->is_day_off = 0;
         $schedule->start_time = '09:00';
         $schedule->end_time = '21:00';
 
-        // Подгружаем мастера для отображения имени в шапке
         $schedule->load('specialist.user');
 
-        // Используем ту же вьюху! Но подменяем роут в форме (об этом ниже)
         return view('admin.schedule.edit', compact('schedule'));
     }
 
@@ -84,7 +80,6 @@ class WorkScheduleController extends Controller
             'break_end'     => 'nullable|date_format:H:i|after:break_start',
         ]);
 
-        // Если день выходной — принудительно очищаем время
         if ($request->input('is_day_off') == 1) {
             $validated['start_time'] = null;
             $validated['end_time'] = null;
@@ -131,7 +126,6 @@ class WorkScheduleController extends Controller
             'break_end' => 'nullable|date_format:H:i|after:break_start',
         ]);
 
-        // Если администратор делает день выходным, очищаем часы или ставим дефолтные
         if ($request->input('is_day_off') == 1) {
             $validated['start_time'] = null;
             $validated['end_time'] = null;

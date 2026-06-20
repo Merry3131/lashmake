@@ -28,8 +28,11 @@ class Service extends Model
         return $this->belongsTo(Category::class);
     }
 
+
+
     public function levels(): BelongsToMany
     {
         return $this->belongsToMany(Level::class, 'level_service')->withPivot('price', 'duration');
     }
+
 }
