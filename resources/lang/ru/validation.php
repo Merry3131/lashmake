@@ -18,5 +18,17 @@ return [
         'phone' => [
             'required' => 'Телефон обязателен для заполнения',
         ],
+
+    ],
+
+    'attributes' => [
+        'last_name'        => 'Фамилия', // Это у вас уже работает
+        'name'             => 'Имя',
+        'first_name'       => 'Имя',
+        'appointment_time' => 'Время записи',
+        'appointment_date' => 'Дата записи',
+        'service_id'       => 'Услуга',
+        'specialist_id'    => 'Мастер',
+        'phone'            => 'Номер телефона',
     ],
 ];

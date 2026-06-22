@@ -166,6 +166,10 @@
                                         <span class="inline-flex items-center px-2.5 py-1 text-sm font-normal  rounded-xl bg-amber-50 text-amber-600 border border-amber-100 font-[Manrope]">
                                             Ожидается
                                         </span>
+                                    @elseif($appointment->status === 'approved')
+                                        <span class="inline-flex items-center px-2.5 py-1 text-sm font-normal  rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 font-[Manrope]">
+                                            Подтверждена
+                                        </span>
                                     @elseif($appointment->status === 'cancelled')
                                         <span class="inline-flex items-center px-2.5 py-1 text-sm font-normal  rounded-xl bg-rose-50 text-rose-600 border border-rose-100 font-[Manrope]">
                                             Отменена

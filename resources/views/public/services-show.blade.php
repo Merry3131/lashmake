@@ -71,13 +71,33 @@
                     <hr class="border-dashed border-gray-200">
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 py-4">
+
                         <div class="flex items-start gap-4">
-                            <div class="flex flex-col gap-1 w-full">
+                            <div class="flex flex-col gap-1 w-full" x-data="{
+                                formatDuration(totalMinutes) {
+                                    const hours = Math.floor(totalMinutes / 60);
+                                    const minutes = totalMinutes % 60;
+                                    let result = [];
+                                    if (hours > 0) {
+                                        let hoursWord = 'часов';
+                                        if (hours % 10 === 1 && hours % 100 !== 11) hoursWord = 'час';
+                                        else if ([2, 3, 4].includes(hours % 10) && ![12, 13, 14].includes(hours % 100)) hoursWord = 'часа';
+                                        result.push(`${hours} ${hoursWord}`);
+                                    }
+                                    if (minutes > 0 || hours === 0) {
+                                        let minutesWord = 'минут';
+                                        if (minutes % 10 === 1 && minutes % 100 !== 11) minutesWord = 'минута';
+                                        else if ([2, 3, 4].includes(minutes % 10) && ![12, 13, 14].includes(minutes % 100)) minutesWord = 'минуты';
+                                        result.push(`${minutes} ${minutesWord}`);
+                                    }
+                                    return result.join(' ');
+                                }
+                            }">
                                 <p class="text-sm tracking-wide text-[#9ca0b0] uppercase mb-1">Длительность</p>
                                 @forelse($service->levels as $level)
                                     <div class="flex justify-between items-center text-sm border-b border-dashed border-gray-100 pb-2 last:border-0 last:pb-0">
                                         <span class="text-pink-500 font-light">{{ $level->display_name }}</span>
-                                        <span class="font-semibold text-[#1e1f22] whitespace-nowrap pl-4">
+                                        <span class="font-semibold text-[#1e1f22] whitespace-nowrap pl-4" x-text="formatDuration({{ $level->pivot->duration }})">
                                             {{ $level->pivot->duration}} мин.
                                         </span>
                                     </div>

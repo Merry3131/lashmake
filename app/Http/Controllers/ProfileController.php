@@ -71,7 +71,14 @@ class ProfileController extends Controller
 
     public function index()
     {
-        $appointments = Appointment::where('client_id', Auth::id())->with(['service', 'specialist.user'])->get();
+        $appointments = Appointment::where('client_id', Auth::id())
+            ->with(['service', 'specialist.user'])
+            // 1. Сначала выводим те, у которых статус 'approved'
+            ->orderByRaw("CASE WHEN status = 'approved' THEN 0 ELSE 1 END")
+            // 2. Затем сортируем по дате сеанса (от самых свежих к более поздним)
+            ->orderBy('appointment_at', 'desc')
+            ->get();
+
         return view('dashboard', compact('appointments'));
     }
 }

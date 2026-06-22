@@ -11,10 +11,19 @@
                 <p class="text-sm text-[#7c7e8c] font-light mt-1">Нажмите на ячейку дня для изменения расписания мастера</p>
             </div>
 
-            <div class="flex gap-1 bg-white p-1 rounded-xl border border-gray-200 shadow-sm">
-                <a href="{{ route('admin.schedule.index', ['date' => $startOfWeek->copy()->subWeek()->format('Y-m-d')]) }}" class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">← Прошлая</a>
-                <a href="{{ route('admin.schedule.index', ['date' => now()->format('Y-m-d')]) }}" class="px-3 py-1.5 text-sm font-semibold text-pink-600 bg-pink-50 rounded-lg transition-colors">Сегодня</a>
-                <a href="{{ route('admin.schedule.index', ['date' => $startOfWeek->copy()->addWeek()->format('Y-m-d')]) }}" class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">Следующая →</a>
+            <div class="flex flex-wrap items-center gap-3">
+                <form action="{{ route('admin.schedule.generate') }}" method="POST" onsubmit="return confirm('Сгенерировать график на 30 дней? Существующие и настроенные вами дни изменены не будут.');">
+                    @csrf
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-colors cursor-pointer flex items-center gap-2">
+                        Сгенерировать график работы
+                    </button>
+                </form>
+
+                <div class="flex gap-1 bg-white p-1 rounded-xl border border-gray-200 shadow-sm">
+                    <a href="{{ route('admin.schedule.index', ['date' => $startOfWeek->copy()->subWeek()->format('Y-m-d')]) }}" class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">← Прошлая</a>
+                    <a href="{{ route('admin.schedule.index', ['date' => now()->format('Y-m-d')]) }}" class="px-3 py-1.5 text-sm font-semibold text-pink-600 bg-pink-50 rounded-lg transition-colors">Сегодня</a>
+                    <a href="{{ route('admin.schedule.index', ['date' => $startOfWeek->copy()->addWeek()->format('Y-m-d')]) }}" class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">Следующая →</a>
+                </div>
             </div>
         </div>
 

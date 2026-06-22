@@ -71,8 +71,6 @@
                         <div class="flex items-center gap-4">
                             <button class="inline-flex items-center px-5 py-2 bg-pink-500 border border-transparent rounded-full font-light text-sm text-white tracking-wide hover:bg-pink-600 transition ease-in-out duration-150 shadow-sm">
                                 <a href="{{route('login')}}">Вход</a>
-
-
                             </button>
                         </div>
                     @endauth
@@ -80,18 +78,19 @@
 
             </div>
 
-{{--            <div class="-me-2 flex items-center lg:hidden">--}}
-{{--                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">--}}
-{{--                    <a href="route('login')">dvdfvdf</a>--}}
-{{--                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">--}}
-{{--                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />--}}
-{{--                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />--}}
-{{--                    </svg>--}}
-{{--                </button>--}}
-{{--            </div>--}}
+            {{-- БУРГЕР-КНОПКА (исправлена) --}}
+            <div class="-me-2 flex items-center lg:hidden">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
         </div>
     </div>
 
+    {{-- Мобильное меню --}}
     <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">Главная</x-responsive-nav-link>
@@ -99,6 +98,11 @@
             <x-responsive-nav-link :href="url('/team')">Мастера</x-responsive-nav-link>
             <x-responsive-nav-link :href="url('/example_of_works')">Примеры работ</x-responsive-nav-link>
             <x-responsive-nav-link :href="url('/reviews')">Отзывы</x-responsive-nav-link>
+            @auth
+                @if(Auth::user()->role === 'master')
+                    <x-responsive-nav-link :href="url('/schedule')">Расписание</x-responsive-nav-link>
+                @endif
+            @endauth
         </div>
 
         @auth
@@ -109,9 +113,26 @@
                 </div>
                 <div class="mt-3 space-y-1">
                     <x-responsive-nav-link :href="route('dashboard')">Личный кабинет</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('profile.edit')">Профиль</x-responsive-nav-link>
+                    @if (\Illuminate\Support\Facades\Auth::user()->isAdmin())
+                        <x-responsive-nav-link :href="route('admin.dashboard')">Админ-панель</x-responsive-nav-link>
+                    @endif
+                    <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Выйти</x-responsive-nav-link>
+                    <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display: none;">
+                        @csrf
+                    </form>
                 </div>
             </div>
         @endauth
+
+        @guest
+            <div class="pt-4 pb-1 border-t border-gray-200 bg-pink-50">
+                <div class=" space-y-1">
+                    <x-responsive-nav-link :href="route('login')">Вход</x-responsive-nav-link>
+                    @if(Route::has('register'))
+                        <x-responsive-nav-link :href="route('register')">Регистрация</x-responsive-nav-link>
+                    @endif
+                </div>
+            </div>
+        @endguest
     </div>
 </nav>

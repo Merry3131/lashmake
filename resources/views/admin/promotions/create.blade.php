@@ -45,18 +45,27 @@
                     </div>
 
                     <div class="space-y-2">
-                        <label for="specialist_id" class="block  text-sm text-[#7c7e8c]">Мастер</label>
-                        <select x-model="specialistId" name="specialist_id" id="specialist_id"
-                                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
-                            <option value="">Все мастера студии</option>
-                            @foreach($specialists as $specialist)
-                                <option value="{{ $specialist->id }}" {{ old('specialist_id') == $specialist->id ? 'selected' : '' }}>
-                                    {{ $specialist->user->first_name }} {{ $specialist->user->last_name }} ({{ $specialist->level->name ?? '' }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
+                        <label for="specialist_id" class="block text-sm text-[#7c7e8c]">Мастер</label>
+                        <div class="relative">
+                            <select name="specialist_id" id="specialist_id"
+                                    x-model="specialistId"
+                                    :disabled="loadingSpecialists"
+                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all disabled:opacity-60">
+
+                                <option value="">Все мастера (диапазон цен)</option>
+
+                                <option value="" disabled x-show="loadingSpecialists">Загрузка мастеров...</option>
+                                <option value="" disabled x-show="!loadingSpecialists && !serviceId">Сначала выберите услугу...</option>
+                                <option value="" disabled x-show="!loadingSpecialists && serviceId && specialistsForService.length === 0">Нет мастеров, выполняющих эту услугу</option>
+
+                                <template x-for="specialist in specialistsForService" :key="specialist.id">
+                                    <option :value="specialist.id"
+                                            x-text="specialist.user.first_name + ' ' + specialist.user.last_name + (specialist.level ? ' (' + specialist.level.name + ')' : '')">
+                                    </option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>                </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="space-y-2">
@@ -116,10 +125,42 @@
     <script>
         function promotionForm() {
             return {
-                priceData: @json($priceData),
-                serviceId: '{{ old('service_id') }}',
-                specialistId: '{{ old('specialist_id') }}',
+                priceData: @json($priceData), // Оставляем для расчета цен на лету
+                serviceId: '{{ old('service_id', '') }}',
+                specialistId: '{{ old('specialist_id', '') }}',
                 discountPercent: {{ old('discount_percent', 0) }},
+
+                // Новые свойства для AJAX-загрузки мастеров
+                specialistsForService: [],
+                loadingSpecialists: false,
+
+                // Асинхронная функция загрузки мастеров (как в edit.blade.php)
+                async loadSpecialists() {
+                    if (!this.serviceId) {
+                        this.specialistsForService = [];
+                        this.specialistId = '';
+                        return;
+                    }
+
+                    this.loadingSpecialists = true;
+                    try {
+                        const response = await fetch(`/api/service/${this.serviceId}/specialists`);
+                        if (!response.ok) throw new Error('Ошибка сети');
+
+                        const specialists = await response.json();
+                        this.specialistsForService = specialists;
+
+                        // Если старый выбранный мастер (например, из old()) не делает эту услугу — сбрасываем его
+                        if (this.specialistId && !this.specialistsForService.some(s => s.id == this.specialistId)) {
+                            this.specialistId = '';
+                        }
+                    } catch (error) {
+                        console.error('Ошибка при загрузке мастеров:', error);
+                        this.specialistsForService = [];
+                    } finally {
+                        this.loadingSpecialists = false;
+                    }
+                },
 
                 get currentServiceData() {
                     if (!this.serviceId || !this.priceData[this.serviceId]) return null;
@@ -131,6 +172,7 @@
                     if (!data) return '— (выберите услугу)';
 
                     if (this.specialistId) {
+                        // Проверяем цену конкретного мастера в priceData
                         const specialistPrice = data.specialists[this.specialistId];
                         if (!specialistPrice) return 'Цена не задана для этого мастера';
                         return specialistPrice.price.toLocaleString('ru-RU') + ' ₽';
@@ -162,7 +204,17 @@
                     return discounted.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽';
                 },
 
-                init() {}
+                init() {
+                    // Если страница открылась и услуга уже выбрана (например, вернулись ошибки валидации формы)
+                    if (this.serviceId) {
+                        this.loadSpecialists();
+                    }
+
+                    // Следим за изменением выбранной услуги и дергаем AJAX
+                    this.$watch('serviceId', () => {
+                        this.loadSpecialists();
+                    });
+                }
             }
         }
     </script>

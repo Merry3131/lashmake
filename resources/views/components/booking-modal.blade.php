@@ -47,6 +47,26 @@
             this.promotionSpecialistId = null;
         },
 
+        formatDuration(totalMinutes) {
+            if (!totalMinutes) return '—';
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            let result = [];
+            if (hours > 0) {
+                let hoursWord = 'часов';
+                if (hours % 10 === 1 && hours % 100 !== 11) hoursWord = 'час';
+                else if ([2, 3, 4].includes(hours % 10) && ![12, 13, 14].includes(hours % 100)) hoursWord = 'часа';
+                result.push(`${hours} ${hoursWord}`);
+            }
+            if (minutes > 0 || hours === 0) {
+                let minutesWord = 'минут';
+                if (minutes % 10 === 1 && minutes % 100 !== 11) minutesWord = 'минута';
+                else if ([2, 3, 4].includes(minutes % 10) && ![12, 13, 14].includes(minutes % 100)) minutesWord = 'минуты';
+                result.push(`${minutes} ${minutesWord}`);
+            }
+            return result.join(' ');
+        },
+
 
         async loadSlots() {
             if (!this.selectedSpecialist || !this.selectedDate || !this.selectedService) {
@@ -236,12 +256,12 @@
 
                                         <div class="text-gray-800 mb-2 font-[Manrope]">{{ $service->name }}</div>
 
-                                        <div class="space-y-1.5 mt-2 bg-white/50 p-2 rounded-lg">
+                                        <div class="space-y-1.5 mt-2 bg-white/50 p-2 rounded-lg" >
                                             @foreach($service->levels as $level)
                                                 <div class="flex justify-between items-center text-sm font-[Manrope]">
                                                     <span class="text-gray-500 ">{{ $level->display_name }}</span>
-                                                    <div class="flex items-center gap-3">
-                                                        <span class="text-gray-400 flex items-center">
+                                                    <div class="flex items-center gap-3" >
+                                                        <span class="text-gray-400 flex items-center" x-text="formatDuration({{ $level->pivot->duration }})">
                                                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -354,7 +374,7 @@
                                                     <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                     </svg>
-                                                    <span x-text="(service.levels?.[0]?.pivot?.duration || service.duration) + ' мин.'"></span>
+                                                    <span x-text="formatDuration(service.levels?.[0]?.pivot?.duration || service.duration)"></span>
                                                 </div>
                                             </div>
                                         </button>
@@ -594,7 +614,7 @@
                             <span class="font-normal text-gray-600 font-[Manrope]">Итого к оплате:</span>
                             <span class="text-2xl text-pink-600 font-[Manrope]" x-text="servicePrice"></span>
                         </div>
-
+                        @guest
                         <div class="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100 rounded-2xl">
                             <div class="flex items-start gap-3">
                                 <div>
@@ -613,6 +633,7 @@
                                 </div>
                             </div>
                         </div>
+                        @endguest
 
                         <div class="mt-4 space-y-2.5">
                             @auth

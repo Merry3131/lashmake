@@ -8,6 +8,7 @@
     <div x-data="{
         selectedService: '{{ old('service_id', $appointment->service_id) }}',
         selectedSpecialist: '{{ old('specialist_id', $appointment->specialist_id) }}',
+        initialSpecialistId: '{{ old('specialist_id', $appointment->specialist_id) }}', {{-- Сохраняем эталонный ID --}}
         selectedDate: '{{ old('appointment_date', \Carbon\Carbon::parse($appointment->appointment_at)->format('Y-m-d')) }}',
         selectedTime: '{{ old('appointment_time', \Carbon\Carbon::parse($appointment->appointment_at)->format('H:i')) }}',
         availableSlots: [],
@@ -29,9 +30,16 @@
                 const specialists = await response.json();
                 this.specialistsForService = specialists;
 
-                // Если текущий специалист не входит в новый список — сбросить
-                if (this.selectedSpecialist && !this.specialistsForService.some(s => s.id == this.selectedSpecialist)) {
-                    this.selectedSpecialist = '';
+                {{-- Принудительно восстанавливаем мастера на первичной загрузке --}}
+                if (this.initialLoad && this.initialSpecialistId) {
+                    this.selectedSpecialist = this.initialSpecialistId;
+                }
+
+                // Если это не первая загрузка и мастер сменился на неподходящего — сбрасываем
+                if (!this.initialLoad) {
+                    if (this.selectedSpecialist && !this.specialistsForService.some(s => s.id == this.selectedSpecialist)) {
+                        this.selectedSpecialist = '';
+                    }
                 }
             } catch (error) {
                 console.error('Ошибка загрузки специалистов:', error);
@@ -55,13 +63,11 @@
                 let slots = await response.json();
                 this.availableSlots = slots;
 
-                // При первой загрузке добавляем текущее время, даже если оно не в списке (для редактирования)
                 if (this.initialLoad && this.selectedTime && !this.availableSlots.includes(this.selectedTime)) {
                     this.availableSlots.push(this.selectedTime);
                     this.availableSlots.sort();
                 }
 
-                // После первой загрузки, если выбранное время исчезло, сбрасываем
                 if (!this.initialLoad && this.selectedTime && !this.availableSlots.includes(this.selectedTime)) {
                     this.selectedTime = null;
                 }
@@ -69,14 +75,19 @@
                 console.error('Ошибка загрузки слотов:', error);
             } finally {
                 this.loading = false;
-                this.initialLoad = false;
             }
         }
     }"
          x-init="
-            loadSpecialists();
-            loadSlots();
-            $watch('selectedService', () => { loadSpecialists(); loadSlots(); });
+            // Сначала загружаем только специалистов, затем слоты.
+            loadSpecialists().then(() => {
+                return loadSlots();
+            }).then(() => {
+                initialLoad = false;
+            });
+
+            {{-- Оптимизировано: ждем загрузку мастеров, прежде чем обновлять слоты при смене услуги --}}
+            $watch('selectedService', async () => { await loadSpecialists(); loadSlots(); });
             $watch('selectedSpecialist', () => loadSlots());
             $watch('selectedDate', () => loadSlots());
          ">
@@ -105,7 +116,6 @@
                     @csrf
                     @method('PUT')
 
-                    <!-- Информация о клиенте (только для чтения) -->
                     <div class="p-4 bg-slate-50/80 rounded-xl border border-slate-100 space-y-1">
                         <span class="block text-sm tracking-wider text-slate-400">Клиент</span>
                         <div class="text-sm text-slate-800">
@@ -116,7 +126,6 @@
                         </div>
                     </div>
 
-                    <!-- Услуга (выбирается первой) -->
                     <div>
                         <label for="service_id" class="block text-xs tracking-wider text-slate-500 mb-2">Услуга</label>
                         <select id="service_id"
@@ -134,31 +143,36 @@
                         @enderror
                     </div>
 
-                    <!-- Мастер (зависит от выбранной услуги) -->
-                    <div>
-                        <label for="specialist_id" class="block text-xs tracking-wider text-slate-500 mb-2">Мастер</label>
-                        <select id="specialist_id"
-                                name="specialist_id"
-                                x-model="selectedSpecialist"
-                                required
-                                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
-                            <option value="">Выберите мастера</option>
-                            <template x-if="loadingSpecialists">
-                                <option disabled>Загрузка мастеров...</option>
-                            </template>
-                            <template x-if="!loadingSpecialists && specialistsForService.length === 0 && selectedService">
-                                <option disabled>Нет мастеров для этой услуги</option>
-                            </template>
-                            <template x-for="specialist in specialistsForService" :key="specialist.id">
-                                <option :value="specialist.id" x-text="specialist.user.last_name + ' ' + specialist.user.first_name + ' (' + (specialist.level?.display_name || 'Мастер') + ')'"></option>
-                            </template>
-                        </select>
-                        @error('specialist_id')
-                        <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
-                        @enderror
+                    <div class="space-y-2">
+                        <label for="specialist_id" class="block text-sm tracking-wider text-[#7c7e8c]">Мастер</label>
+                        <div class="relative">
+                            <select name="specialist_id" id="specialist_id"
+                                    x-model="selectedSpecialist"
+                                    :disabled="loadingSpecialists"
+                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all disabled:opacity-60">
+
+                                <option value="">Все мастера студии (диапазон цен)</option>
+
+                                {{-- ВРЕМЕННАЯ ОПЦИЯ: не дает браузеру сбросить значение до окончания загрузки через API --}}
+                                @if($appointment->specialist)
+                                    <option value="{{ $appointment->specialist_id }}" x-show="initialLoad">
+                                        {{ $appointment->specialist->user->first_name }} {{ $appointment->specialist->user->last_name }}
+                                    </option>
+                                @endif
+
+                                <option value="" disabled x-show="loadingSpecialists">Загрузка мастеров...</option>
+                                <option value="" disabled x-show="!loadingSpecialists && !selectedService">Сначала выберите услугу...</option>
+                                <option value="" disabled x-show="!loadingSpecialists && selectedService && specialistsForService.length === 0">Нет мастеров, выполняющих эту услугу</option>
+
+                                <template x-for="specialist in specialistsForService" :key="specialist.id">
+                                    <option :value="specialist.id"
+                                            x-text="specialist.user.first_name + ' ' + specialist.user.last_name + (specialist.level ? ' (' + specialist.level.name + ')' : '')">
+                                    </option>
+                                </template>
+                            </select>
+                        </div>
                     </div>
 
-                    <!-- Дата -->
                     <div>
                         <label for="appointment_date" class="block text-xs tracking-wider text-slate-500 mb-2">Дата записи</label>
                         <input type="date"
@@ -173,7 +187,6 @@
                         @enderror
                     </div>
 
-                    <!-- Время -->
                     <div class="mt-4">
                         <label class="block text-xs tracking-wider text-slate-500 mb-3">
                             Время записи
@@ -212,7 +225,6 @@
                         @enderror
                     </div>
 
-                    <!-- Статус записи -->
                     <div>
                         <label for="status" class="block text-xs tracking-wider text-slate-500 mb-2">Статус записи</label>
                         <select id="status" name="status" required

@@ -12,13 +12,23 @@ use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = Appointment::with([
+        $query = Appointment::with([
             'specialist.user',
             'user',
             'service'
-        ])->orderBy('appointment_at', 'desc')->get();
+        ]);
+
+        // Проверяем, передан ли корректный статус для фильтрации
+        if ($request->has('status') && in_array($request->status, ['pending', 'approved', 'completed', 'cancelled'])) {
+            $query->where('status', $request->status);
+        }
+
+        // Применяем вашу текущую сортировку и получаем отфильтрованные записи
+        $appointments = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'confirmed', 'completed', 'cancelled') ASC")
+            ->orderBy('appointment_at', 'desc')
+            ->get();
 
         return view('admin.appointments.index', compact('appointments'));
     }

@@ -78,9 +78,7 @@
                                             -{{ $promotion->discount_percent }}%
                                         </span>
                                     @endif
-                                    <button class="bg-[#ff5c8a] text-white px-4 py-2 rounded-full text-xs tracking-wider font-normal transition-all duration-300 hover:bg-[#e04b75] hover:cursor-pointer whitespace-nowrap">
-                                        Записаться
-                                    </button>
+
                                 </div>
 
                             </div>
@@ -171,17 +169,53 @@
                                     @endif
                                 </div>
 
-                                <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                                    <span class="text-sm text-gray-900 whitespace-nowrap">
-                                        @if($service->levels->isNotEmpty())
-                                            От {{ number_format($service->levels->min('pivot.price'), 0, '.', ' ') }} ₽
-                                        @else
-                                            Цена не задана
-                                        @endif
-                                    </span>
+                                                <div class="flex items-center gap-4 sm:gap-6 w-full sm:w-auto justify-between sm:justify-end" x-data="{
+    formatDuration(totalMinutes) {
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        let result = [];
+        if (hours > 0) {
+            let hoursWord = 'часов';
+            if (hours % 10 === 1 && hours % 100 !== 11) hoursWord = 'час';
+            else if ([2, 3, 4].includes(hours % 10) && ![12, 13, 14].includes(hours % 100)) hoursWord = 'часа';
+            result.push(`${hours} ${hoursWord}`);
+        }
+        if (minutes > 0 || hours === 0) {
+            let minutesWord = 'минут';
+            if (minutes % 10 === 1 && minutes % 100 !== 11) minutesWord = 'минута';
+            else if ([2, 3, 4].includes(minutes % 10) && ![12, 13, 14].includes(minutes % 100)) minutesWord = 'минуты';
+            result.push(`${minutes} ${minutesWord}`);
+        }
+        return result.join(' ');
+    }
+}">
+                                                    @if($service->levels->isNotEmpty())
+                                                        @php
+                                                            $minDuration = $service->levels->min('pivot.duration');
+                                                            $maxDuration = $service->levels->max('pivot.duration');
+                                                        @endphp
+                                                        <span class="text-xs text-gray-400 whitespace-nowrap flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            @if($minDuration == $maxDuration)
+                                                                <span x-text="formatDuration({{ $minDuration }})">{{ $minDuration }} мин</span>
+                                                            @else
+                                                                <span>от</span> <span x-text="formatDuration({{ $minDuration }})">{{ $minDuration }} мин</span>
+                                                            @endif
+        </span>
+                                                    @endif
 
-                                    <button class="bg-[#ff5c8a] text-white px-4 py-2 rounded-full text-xs tracking-wider font-normal transition-all duration-300 hover:bg-[#e04b75] hover:cursor-pointer whitespace-nowrap">Подробнее</button>
-                                </div>
+                                                    <span class="text-sm text-gray-900 whitespace-nowrap font-medium">
+        @if($service->levels->isNotEmpty())
+                                                            От {{ number_format($service->levels->min('pivot.price'), 0, '.', ' ') }} ₽
+                                                        @else
+                                                            Цена не задана
+                                                        @endif
+    </span>
+
+                                                    <button class="bg-[#ff5c8a] text-white px-4 py-2 rounded-full text-xs tracking-wider font-normal transition-all duration-300 hover:bg-[#e04b75] hover:cursor-pointer whitespace-nowrap">Подробнее</button>
+                                                </div>
                             </div>
                             </a>
                             @empty

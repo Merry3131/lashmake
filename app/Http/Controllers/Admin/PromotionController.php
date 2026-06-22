@@ -15,9 +15,14 @@ class PromotionController extends Controller
     /**
      * Display a listing of the resource.
      */
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
         $promotions = Promotion::with(['service', 'specialist.level', 'specialist.user'])
+            // Сортируем по дате начала акции по возрастанию (от ранних к поздним)
+            ->orderBy('start_date', 'desc')
             ->get()
             ->map(function ($promotion) {
                 // Добавляем вычисляемое поле
@@ -31,10 +36,13 @@ class PromotionController extends Controller
     /**
      * Show the form for creating a new resource.
      */
+
+
+
     public function create()
     {
         $services = Service::where('active', 1)->get();
-        $specialists = Specialist::with('user', 'level')->get();
+        $specialists = Specialist::with('user', 'level', 'service_specialist')->get();
 
         // Формируем массив с ценами для каждой услуги
         $priceData = [];
@@ -110,7 +118,7 @@ class PromotionController extends Controller
     public function edit(Promotion $promotion)
     {
         $services = Service::where('active', 1)->get();
-        $specialists = Specialist::with('user', 'level')->get();
+        $specialists = Specialist::with('user', 'level', 'service_specialist')->get();
 
         $priceData = [];
         foreach ($services as $service) {

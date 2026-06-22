@@ -112,6 +112,77 @@ class WorkScheduleController extends Controller
     }
 
     /**
+     * Автоматическая генерация графика работы 2/2 на 30 дней вперёд (Вариант А: только для пустых дней).
+     */
+    public function generate(Request $request)
+    {
+        $specialists = Specialist::all();
+
+        if ($specialists->isEmpty()) {
+            return redirect()->back()->with('error', 'В базе данных нет мастеров для генерации графика!');
+        }
+
+        $startDate = Carbon::today();
+        $generatedCount = 0;
+
+
+        for ($i = 0; $i < 30; $i++) {
+            $currentDate = $startDate->copy()->addDays($i);
+            $dateStr = $currentDate->format('Y-m-d');
+
+            foreach ($specialists as $index => $specialist) {
+                $exists = WorkSchedule::where('specialist_id', $specialist->id)
+                    ->where('work_date', $dateStr)
+                    ->exists();
+
+                if ($exists) {
+                    continue;
+                }
+
+                $isFirstGroup = ($index % 2 === 0);
+                $dayInCycle = $i % 4;
+
+                $isWorking = false;
+                if ($isFirstGroup && ($dayInCycle === 0 || $dayInCycle === 1)) {
+                    $isWorking = true;
+                } elseif (!$isFirstGroup && ($dayInCycle === 2 || $dayInCycle === 3)) {
+                    $isWorking = true;
+                }
+
+
+                if ($isWorking) {
+                    WorkSchedule::create([
+                        'specialist_id' => $specialist->id,
+                        'work_date'     => $dateStr,
+                        'start_time'    => '09:00:00',
+                        'end_time'      => '21:00:00',
+                        'break_start'   => '14:00:00',
+                        'break_end'     => '15:00:00',
+                        'is_day_off'    => false,
+                    ]);
+                } else {
+
+                    WorkSchedule::create([
+                        'specialist_id' => $specialist->id,
+                        'work_date'     => $dateStr,
+                        'start_time'    => null,
+                        'end_time'      => null,
+                        'break_start'   => null,
+                        'break_end'     => null,
+                        'is_day_off'    => true,
+                    ]);
+                }
+
+                $generatedCount++;
+            }
+        }
+
+        return redirect()
+            ->route('admin.schedule.index', ['date' => $startDate->format('Y-m-d')])
+            ->with('success', "График успешно сгенерирован! Заполнено новых дней: {$generatedCount}. Ранее измененные дни не затронуты.");
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)

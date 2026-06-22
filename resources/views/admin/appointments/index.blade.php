@@ -32,6 +32,33 @@
             </div>
         @endif
 
+        <div class="flex flex-wrap items-center gap-2 mb-6">
+            <a href="{{ route('admin.appointments.index') }}"
+               class="px-4 py-2 text-xs rounded-xl border transition-all duration-200 {{ !request('status') ? 'bg-[#1e1f22] text-white border-[#1e1f22]' : 'bg-white text-[#7c7e8c] border-[#f1f1f5] hover:bg-[#f8f8fa]' }}">
+                Все записи
+            </a>
+
+            <a href="{{ route('admin.appointments.index', ['status' => 'pending']) }}"
+               class="px-4 py-2 text-xs rounded-xl border transition-all duration-200 {{ request('status') === 'pending' ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-[#7c7e8c] border-[#f1f1f5] hover:bg-[#f8f8fa]' }}">
+                Ожидает
+            </a>
+
+            <a href="{{ route('admin.appointments.index', ['status' => 'approved']) }}"
+               class="px-4 py-2 text-xs rounded-xl border transition-all duration-200 {{ request('status') === 'approved' ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white text-[#7c7e8c] border-[#f1f1f5] hover:bg-[#f8f8fa]' }}">
+                Подтверждена
+            </a>
+
+            <a href="{{ route('admin.appointments.index', ['status' => 'completed']) }}"
+               class="px-4 py-2 text-xs rounded-xl border transition-all duration-200 {{ request('status') === 'completed' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-[#7c7e8c] border-[#f1f1f5] hover:bg-[#f8f8fa]' }}">
+                Выполнена
+            </a>
+
+            <a href="{{ route('admin.appointments.index', ['status' => 'cancelled']) }}"
+               class="px-4 py-2 text-xs rounded-xl border transition-all duration-200 {{ request('status') === 'cancelled' ? 'bg-rose-500 text-white border-rose-500' : 'bg-white text-[#7c7e8c] border-[#f1f1f5] hover:bg-[#f8f8fa]' }}">
+                Отменена
+            </a>
+        </div>
+
         <div class="w-full bg-white rounded-3xl border border-[#f1f1f5] shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full border-collapse text-left">
@@ -74,6 +101,7 @@
                                         </span>
                                         @break
                                     @case('confirmed')
+                                    @case('approved')
                                         <span class="inline-flex items-center px-2.5 py-1 text-sm l tracking-wide rounded-lg bg-emerald-50 text-emerald-700">
                                             Подтверждена
                                         </span>
@@ -115,7 +143,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                     </svg>
                                 </div>
-                                <p class="font-light text-sm">Записей на процедуры пока нет.</p>
+                                <p class="font-light text-sm">Записей с таким статусом пока нет.</p>
                             </td>
                         </tr>
                     @endforelse

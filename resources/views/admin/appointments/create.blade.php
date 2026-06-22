@@ -100,9 +100,9 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="name" class="block text-xs tracking-wider text-slate-500 mb-2">Имя клиента</label>
-                                <input type="text" id="name" name="name" value="{{ old('name') }}" ::required="userMode === 'new'"
+                                <input type="text" id="name" name="name" value="{{ old('first_name') }}" ::required="userMode === 'new'"
                                        class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 focus:outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 transition-all">
-                                @error('name')
+                                @error('first_name')
                                 <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>
                                 @enderror
                             </div>

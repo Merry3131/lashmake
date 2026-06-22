@@ -85,6 +85,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/services/print', [App\Http\Controllers\Admin\ServiceController::class, 'print'])->name('services.print');
     // модерация отзывов
     Route::resource('reviews', \App\Http\Controllers\Admin\ReviewController::class)->only(['index', 'update', 'destroy']);
+
+    Route::post('schedule/generate', [App\Http\Controllers\Admin\WorkScheduleController::class, 'generate'])->name('schedule.generate');
 });
 
 Route::get('/forgot-password', function () {
