@@ -106,6 +106,46 @@
             </div>
 
             <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm max-w-4xl mx-auto mt-8 font-sans">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm  text-gray-900 font-[Playfair_Display]">
+                            Ваши уведомления
+                        </h3>
+
+                        @if(auth()->user()->notifications->isNotEmpty())
+                            <form action="{{ route('notifications.clear') }}" method="POST" onsubmit="return confirm('Вы уверены, что хотите удалить все уведомления?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-sm text-gray-400 hover:text-red-500 font-light  border-b border-transparent hover:border-red-500 transition-all duration-200 cursor-pointer">
+                                    Очистить всё
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+
+                    <div class="space-y-3">
+                        @forelse(\Illuminate\Support\Facades\Auth::user()->notifications as $notification)
+                            <div class="p-4 rounded-2xl border transition-all {{ $notification->read_at ? 'bg-gray-50/50 border-gray-100 opacity-60' : 'bg-pink-50/30 border-pink-100' }}">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm  font-medium {{ $notification->data['type'] === 'confirmed' ? 'text-green-600' : 'text-[#ff5c8a]' }}">
+                                            {{ $notification->data['title'] }}
+                                        </span>
+                                    </div>
+                                    <span class="text-sm text-gray-400 font-light">
+                                        {{ $notification->created_at->diffForHumans() }}
+                                    </span>
+                                </div>
+
+                                <p class="text-sm text-gray-700 font-light mt-1.5 leading-relaxed">
+                                    {{ $notification->data['message'] }}
+                                </p>
+                            </div>
+                        @empty
+                            <p class="text-sm text-gray-400 italic font-light text-center py-4">У вас пока нет уведомлений.</p>
+                        @endforelse
+                    </div>
+                </div>
 
                 <div class="flex items-center justify-between pb-3 border-b border-gray-200">
                     <h3 class="text-lg font-normal text-[#1e1f22]  font-[Playfair_Display]">
@@ -204,46 +244,7 @@
                     @endforelse
                 </div>
 
-                <div class="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm max-w-4xl mx-auto mt-8 font-sans">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm  text-gray-900 font-[Playfair_Display]">
-                            Ваши уведомления
-                        </h3>
 
-                        @if(auth()->user()->notifications->isNotEmpty())
-                            <form action="{{ route('notifications.clear') }}" method="POST" onsubmit="return confirm('Вы уверены, что хотите удалить все уведомления?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-sm text-gray-400 hover:text-red-500 font-light  border-b border-transparent hover:border-red-500 transition-all duration-200 cursor-pointer">
-                                    Очистить всё
-                                </button>
-                            </form>
-                        @endif
-                    </div>
-
-                    <div class="space-y-3">
-                        @forelse(\Illuminate\Support\Facades\Auth::user()->notifications as $notification)
-                            <div class="p-4 rounded-2xl border transition-all {{ $notification->read_at ? 'bg-gray-50/50 border-gray-100 opacity-60' : 'bg-pink-50/30 border-pink-100' }}">
-                                <div class="flex items-center justify-between gap-4">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-sm  font-medium {{ $notification->data['type'] === 'confirmed' ? 'text-green-600' : 'text-[#ff5c8a]' }}">
-                                            {{ $notification->data['title'] }}
-                                        </span>
-                                    </div>
-                                    <span class="text-sm text-gray-400 font-light">
-                                        {{ $notification->created_at->diffForHumans() }}
-                                    </span>
-                                </div>
-
-                                <p class="text-sm text-gray-700 font-light mt-1.5 leading-relaxed">
-                                    {{ $notification->data['message'] }}
-                                </p>
-                            </div>
-                        @empty
-                            <p class="text-sm text-gray-400 italic font-light text-center py-4">У вас пока нет уведомлений.</p>
-                        @endforelse
-                    </div>
-                </div>
 
             </div>
         </div>

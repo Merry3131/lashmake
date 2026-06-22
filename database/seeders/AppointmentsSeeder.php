@@ -47,15 +47,6 @@ class AppointmentsSeeder extends Seeder
                 'status' => 'completed',
                 'notes' => 'Повторный визит.',
             ],
-            [
-                'client_id' => 4,
-                'specialist_id' => 1,
-                'service_id' => 4,
-                'appointment_at' => Carbon::now()->addDays(1)->setTime(18, 0, 0),
-                'final_price' => 2000.00,
-                'status' => 'cancelled',
-                'notes' => 'Отмена по просьбе клиента.',
-            ],
         ];
 
         foreach ($appointments as $data) {

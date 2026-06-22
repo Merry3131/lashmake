@@ -16,16 +16,16 @@ class UserSeeder extends Seeder
     {
         $users = [
             [
-                'first_name' => 'Алена',
-                'last_name' => 'Хабибуллина',
-                'email' => 'habibullina_alena@gmail.com',
+                'first_name' => 'Admin',
+                'last_name' => 'Admin',
+                'email' => 'kristinafisin@gmail.com',
                 'password' => Hash::make('qwerty'),
                 'phone' => '+79086541212',
                 'role' => 'admin'
             ],
             [
                 'first_name' => 'Надежда',
-                'last_name' => '',
+                'last_name' => 'Хабибуллина',
                 'email' => 'nadegda@mail.ru',
                 'password' => Hash::make('12345678'),
                 'phone' => '+79082342343',
@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'first_name' => 'Светлана',
-                'last_name' => '',
+                'last_name' => 'Петрова',
                 'email' => 'svetlata@gmail.com',
                 'password' => Hash::make('12345678'),
                 'phone' => '+79991233456',
@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'first_name' => 'Марьяна',
-                'last_name' => '',
+                'last_name' => 'Сидорова',
                 'email' => 'mariana@mail.ru',
                 'password' => Hash::make('12345678'),
                 'phone' => '+79086547878',
@@ -49,7 +49,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'first_name' => 'Дарья',
-                'last_name' => 'Д',
+                'last_name' => 'Шевченко',
                 'email' => 'dariad@mail.ru',
                 'password' => Hash::make('12345678'),
                 'phone' => '+79086547878',
@@ -57,7 +57,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'first_name' => 'Надежда',
-                'last_name' => 'Р',
+                'last_name' => 'Никитина',
                 'email' => 'nadegnar@mail.ru',
                 'password' => Hash::make('12345678'),
                 'phone' => '+79086547878',
@@ -65,7 +65,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'first_name' => 'Олеся',
-                'last_name' => 'М',
+                'last_name' => 'Верещак',
                 'email' => 'olesia@mail.ru',
                 'password' => Hash::make('12345678'),
                 'phone' => '+79086547878',
@@ -73,7 +73,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'first_name' => 'Алена',
-                'last_name' => 'М',
+                'last_name' => 'Шарова',
                 'email' => 'alenam@mail.ru',
                 'password' => Hash::make('12345678'),
                 'phone' => '+79086547878',
@@ -81,7 +81,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'first_name' => 'Мария',
-                'last_name' => 'С',
+                'last_name' => 'Мамедова',
                 'email' => 'marias@mail.ru',
                 'password' => Hash::make('12345678'),
                 'phone' => '+79086547878',
@@ -89,7 +89,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'first_name' => 'Анастасия',
-                'last_name' => 'с',
+                'last_name' => 'Фролова',
                 'email' => 'anastasia@mail.ru',
                 'password' => Hash::make('12345678'),
                 'phone' => '+79086547878',
@@ -97,7 +97,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'first_name' => 'Карина',
-                'last_name' => 'С',
+                'last_name' => 'Султинский',
                 'email' => 'karina@mail.ru',
                 'password' => Hash::make('12345678'),
                 'phone' => '+79086547878',
